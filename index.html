@@ -162,12 +162,15 @@
       collectionSection.innerHTML = '';
       appState.loans.forEach((loan) => {
         const customer = appState.customers.find((c) => c.id === loan.customerId);
+        const collectedAmount = appState.collections
+          .filter((collection) => collection.loanId === loan.id)
+          .reduce((total, collection) => total + loan.loanAmount, 0);
         const loanDiv = document.createElement('tr');
         loanDiv.innerHTML = `
           <td>${customer ? customer.name : 'Unknown'}</td>
           <td>${loan.id}</td>
           <td>${new Date(loan.startDate).toLocaleDateString()}</td>
-          <td>${loan.loanAmount}</td>
+          <td>${collectedAmount}</td>
           <td><button onclick="handleCollect('${loan.id}')">Collect</button></td>
         `;
         collectionSection.appendChild(loanDiv);
@@ -181,8 +184,12 @@
         appState.collections.push({ loanId, date: new Date().toISOString() });
         await saveData();
         alert(`Collection recorded for Loan ID: ${loanId}`);
+        populateCollectionSection(); // Update the collection section
       }
     }
+
+    // Make handleCollect globally accessible
+    window.handleCollect = handleCollect;
 
     const addCustomerForm = document.getElementById('addCustomerForm');
     addCustomerForm.addEventListener('submit', async (event) => {
