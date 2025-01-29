@@ -74,6 +74,7 @@
               <th>Interest Rate</th>
               <th>Duration</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="loansList">
@@ -85,6 +86,9 @@
               <td data-label="Interest Rate">5%</td>
               <td data-label="Duration">30 days</td>
               <td data-label="Status">Active</td>
+              <td data-label="Action">
+                <button onclick="handleDeleteLoan('LOAN0001')">Delete</button>
+              </td>
             </tr>
             <!-- ...existing code... -->
           </tbody>
@@ -92,6 +96,7 @@
       </div>
       <div id="collectionsPage" style="display: none;">
         <h2>Collections</h2>
+        <input type="text" id="filterLoanId" placeholder="Filter by Loan ID" oninput="filterCollections()" />
         <table class="responsive-table" id="collectionTable">
           <thead>
             <tr>
@@ -112,7 +117,7 @@
               <td data-label="Collected Amount">$500</td>
               <td data-label="Count">5</td>
               <td data-label="Action">
-                <button>Collect</button>
+                <button onclick="handleDeleteCollection('LOAN0001')">Delete</button>
               </td>
             </tr>
             <!-- ...existing code... -->
@@ -246,6 +251,9 @@
           <td data-label="Interest Rate">${loan.interestRate}</td>
           <td data-label="Duration">${loan.duration}</td>
           <td data-label="Status">${loan.status}</td>
+          <td data-label="Action">
+            <button onclick="handleDeleteLoan('${loan.id}')">Delete</button>
+          </td>
         `;
         loansList.appendChild(loanRow);
       });
@@ -275,6 +283,7 @@
             <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
               ${isCollectDisabled ? 'Completed' : 'Collect'}
             </button>
+            <button onclick="handleDeleteCollection('${loan.id}')">Delete</button>
           </td>
         `;
         collectionSection.appendChild(loanDiv);
@@ -292,8 +301,46 @@
       }
     }
 
-    // Make handleCollect globally accessible
+    async function handleDeleteLoan(loanId) {
+      const confirmed = confirm('Are you sure you want to delete this loan?');
+      if (confirmed) {
+        appState.loans = appState.loans.filter((loan) => loan.id !== loanId);
+        appState.collections = appState.collections.filter((collection) => collection.loanId !== loanId);
+        await saveData();
+        showToast(`Loan ID: ${loanId} deleted successfully!`);
+        populateLoansList();
+        populateCollectionSection();
+      }
+    }
+
+    async function handleDeleteCollection(loanId) {
+      const confirmed = confirm('Are you sure you want to delete all collections for this loan?');
+      if (confirmed) {
+        appState.collections = appState.collections.filter((collection) => collection.loanId !== loanId);
+        await saveData();
+        showToast(`Collections for Loan ID: ${loanId} deleted successfully!`);
+        populateCollectionSection();
+      }
+    }
+
+    function filterCollections() {
+      const filterLoanId = document.getElementById('filterLoanId').value.toLowerCase();
+      const collectionSection = document.getElementById('collectionSection');
+      const rows = collectionSection.getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        const loanIdCell = rows[i].getElementsByTagName('td')[1];
+        if (loanIdCell) {
+          const loanId = loanIdCell.textContent || loanIdCell.innerText;
+          rows[i].style.display = loanId.toLowerCase().indexOf(filterLoanId) > -1 ? '' : 'none';
+        }
+      }
+    }
+
+    // Make handleCollect, handleDeleteLoan, handleDeleteCollection, and filterCollections globally accessible
     window.handleCollect = handleCollect;
+    window.handleDeleteLoan = handleDeleteLoan;
+    window.handleDeleteCollection = handleDeleteCollection;
+    window.filterCollections = filterCollections;
 
     const addCustomerForm = document.getElementById('addCustomerForm');
     addCustomerForm.addEventListener('submit', async (event) => {
