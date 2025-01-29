@@ -70,7 +70,7 @@
   <div id="app">
     <header>
       <h1>Retail Loan Management</h1>
-      <nav>
+      <nav id="mainNav" style="display: none;">
         <button id="customersPageButton">Customers</button>
         <button id="loansPageButton">Loans</button>
         <button id="collectionsPageButton">Collections</button>
@@ -353,6 +353,7 @@
         users: appState.users, // Preserve users
       };
       showToast('You have been logged out.');
+      document.getElementById('mainNav').style.display = 'none';
       document.getElementById('customersPage').style.display = 'none';
       document.getElementById('loansPage').style.display = 'none';
       document.getElementById('collectionsPage').style.display = 'none';
@@ -373,6 +374,7 @@
         const user = users.find((user) => user.username === username && user.password === password);
         if (user) {
           document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('mainNav').style.display = 'block';
           if (user.type === 'admin') {
             document.getElementById('adminDashboard').style.display = 'block';
           } else if (user.type === 'manager') {
@@ -409,6 +411,7 @@
     });
 
     // Initially show login screen
+    document.getElementById('mainNav').style.display = 'none';
     document.getElementById('customersPage').style.display = 'none';
     document.getElementById('loansPage').style.display = 'none';
     document.getElementById('collectionsPage').style.display = 'none';
