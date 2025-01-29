@@ -212,6 +212,10 @@
         const dailyCollection = dailyAmount + (dailyAmount * loan.interestRate / 100);
         const collections = appState.collections.filter((collection) => collection.loanId === loan.id);
         const collectedAmount = collections.reduce((total, collection) => total + dailyCollection, 0);
+        const isCollectDisabled = collections.length >= loan.duration;
+        if (isCollectDisabled) {
+          loan.status = 'completed';
+        }
         const loanDiv = document.createElement('tr');
         loanDiv.innerHTML = `
           <td>${customer ? customer.name : 'Unknown'}</td>
@@ -219,7 +223,7 @@
           <td>${new Date(loan.startDate).toLocaleDateString()}</td>
           <td>${collectedAmount.toFixed(2)}</td>
           <td>${collections.length}</td>
-          <td><button onclick="handleCollect('${loan.id}')">Collect</button></td>
+          <td><button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'disabled' : ''}>Collect</button></td>
         `;
         collectionSection.appendChild(loanDiv);
       });
@@ -258,7 +262,7 @@
       const interestRate = parseFloat(document.getElementById('interestRate').value);
       const duration = parseInt(document.getElementById('duration').value, 10);
       const loanId = autoGenerateLoanId();
-      appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration, startDate: new Date().toISOString() });
+      appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration, startDate: new Date().toISOString(), status: 'active' });
       await saveData();
       populateCollectionSection();
       showToast('Loan added successfully!');
