@@ -48,10 +48,10 @@
     </main>
   </div>
   <script type="module">
-    import config from './config.js';
+    import { config, getToken } from './config.js';
 
     const isProduction = window.location.hostname !== '127.0.0.1';
-    const { gistId, getToken } = config;
+    const { gistId } = config;
     const apiUrl = `https://api.github.com/gists/${gistId}`;
     const localDataUrl = 'data.json';
 
