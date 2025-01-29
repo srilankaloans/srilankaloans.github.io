@@ -27,6 +27,43 @@
     .responsive-table tr:hover {
       background-color: #ddd;
     }
+    /* Toaster styles */
+    .toaster {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+    .toaster.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+    @-webkit-keyframes fadein {
+      from {bottom: 0; opacity: 0;} 
+      to {bottom: 30px; opacity: 1;}
+    }
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+    @-webkit-keyframes fadeout {
+      from {bottom: 30px; opacity: 1;} 
+      to {bottom: 0; opacity: 0;}
+    }
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
   </style>
 </head>
 <body>
@@ -67,6 +104,7 @@
               <th>Loan ID</th>
               <th>Start Date</th>
               <th>Collected Amount</th>
+              <th>Count</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -79,6 +117,7 @@
       </div>
     </main>
   </div>
+  <div id="toaster" class="toaster"></div>
   <script type="module">
     import { config, getToken } from './config.js';
 
@@ -94,6 +133,13 @@
       users: [], // Add users to the app state
     };
 
+    function showToast(message) {
+      const toaster = document.getElementById('toaster');
+      toaster.textContent = message;
+      toaster.className = "toaster show";
+      setTimeout(() => { toaster.className = toaster.className.replace("show", ""); }, 3000);
+    }
+
     async function fetchData() {
       try {
         const response = await fetch(isProduction ? apiUrl : localDataUrl, {
@@ -105,7 +151,7 @@
         populateCollectionSection();
       } catch (error) {
         console.error('Error fetching data:', error);
-        alert('Error fetching data. Please try again.');
+        showToast('Error fetching data. Please try again.');
       }
     }
 
@@ -131,10 +177,10 @@
           // For local development, you might need to implement a local server to handle saving data
           console.log('Data to be saved locally:', updatedContent);
         }
-        alert('Data saved successfully!');
+        showToast('Data saved successfully!');
       } catch (error) {
         console.error('Error saving data:', error);
-        alert('Error saving data. Please try again.');
+        showToast('Error saving data. Please try again.');
       }
     }
 
@@ -163,16 +209,16 @@
       appState.loans.forEach((loan) => {
         const customer = appState.customers.find((c) => c.id === loan.customerId);
         const dailyAmount = loan.loanAmount / loan.duration;
-        const dailyCollection = dailyAmount + (dailyAmount* loan.interestRate / 100);
-        const collectedAmount = appState.collections
-          .filter((collection) => collection.loanId === loan.id)
-          .reduce((total, collection) => total + dailyCollection, 0);
+        const dailyCollection = dailyAmount + (dailyAmount * loan.interestRate / 100);
+        const collections = appState.collections.filter((collection) => collection.loanId === loan.id);
+        const collectedAmount = collections.reduce((total, collection) => total + dailyCollection, 0);
         const loanDiv = document.createElement('tr');
         loanDiv.innerHTML = `
           <td>${customer ? customer.name : 'Unknown'}</td>
           <td>${loan.id}</td>
           <td>${new Date(loan.startDate).toLocaleDateString()}</td>
           <td>${collectedAmount.toFixed(2)}</td>
+          <td>${collections.length}</td>
           <td><button onclick="handleCollect('${loan.id}')">Collect</button></td>
         `;
         collectionSection.appendChild(loanDiv);
@@ -185,7 +231,7 @@
         const loan = appState.loans.find((l) => l.id === loanId);
         appState.collections.push({ loanId, date: new Date().toISOString() });
         await saveData();
-        alert(`Collection recorded for Loan ID: ${loanId}`);
+        showToast(`Collection recorded for Loan ID: ${loanId}`);
         populateCollectionSection(); // Update the collection section
       }
     }
@@ -201,7 +247,7 @@
       appState.customers.push({ id: customerId, name: customerName });
       await saveData();
       populateCustomerDropdown();
-      alert('Customer added successfully!');
+      showToast('Customer added successfully!');
     });
 
     const addLoanForm = document.getElementById('addLoanForm');
@@ -215,7 +261,7 @@
       appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration, startDate: new Date().toISOString() });
       await saveData();
       populateCollectionSection();
-      alert('Loan added successfully!');
+      showToast('Loan added successfully!');
     });
 
     document.getElementById('logoutButton').addEventListener('click', () => {
@@ -226,7 +272,7 @@
         collections: [],
         users: appState.users, // Preserve users
       };
-      alert('You have been logged out.');
+      showToast('You have been logged out.');
       document.getElementById('managerDashboard').style.display = 'none';
       document.getElementById('adminDashboard').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
@@ -253,11 +299,11 @@
             fetchData();
           }
         } else {
-          alert('Invalid credentials!');
+          showToast('Invalid credentials!');
         }
       } catch (error) {
         console.error('Error fetching users:', error);
-        alert('Error during login. Please try again.');
+        showToast('Error during login. Please try again.');
       }
     });
 
