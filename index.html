@@ -11,7 +11,7 @@
 <body>
   <div id="app">
     <header>
-      <h1>Retail Loan Management</h1>
+      <h1>Sri Lanka Loans</h1>
       <button id="menuToggle" class="menu-toggle" style="display: none;">&#9776;</button>
       <nav id="mainNav" style="display: none;">
         <button id="customersPageButton">Customers</button>
@@ -386,7 +386,7 @@
         const user = users.find((user) => user.username === username && user.password === password);
         if (user) {
           document.getElementById('loginScreen').style.display = 'none';
-          document.getElementById('mainNav').style.display = 'block';
+          document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
           document.getElementById('menuToggle').style.display = 'block';
           if (user.type === 'admin') {
             document.getElementById('adminDashboard').style.display = 'block';
