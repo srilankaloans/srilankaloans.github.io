@@ -55,10 +55,13 @@ button:hover {
 .responsive-table {
     width: 100%;
     border-collapse: collapse;
+    overflow-x: auto; /* Add horizontal scroll for small screens */
+    display: block; /* Ensure table is block element for responsiveness */
 }
 .responsive-table th, .responsive-table td {
     border: 1px solid #ddd;
     padding: 8px;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 .responsive-table th {
     background-color: #f2f2f2;
@@ -69,6 +72,43 @@ button:hover {
 }
 .responsive-table tr:hover {
     background-color: #ddd;
+}
+@media (max-width: 768px) {
+    .responsive-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+    .responsive-table thead, .responsive-table tbody, .responsive-table th, .responsive-table td, .responsive-table tr {
+        display: block;
+    }
+    .responsive-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .responsive-table tr {
+        border: 1px solid #ccc;
+        margin-bottom: 5px;
+    }
+    .responsive-table td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+    }
+    .responsive-table td:before {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        transform: translateY(-50%);
+        content: attr(data-label);
+        font-weight: bold;
+    }
 }
 /* Toaster styles */
 .toaster {

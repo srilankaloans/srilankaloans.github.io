@@ -12,7 +12,7 @@
   <div id="app">
     <header>
       <h1>Retail Loan Management</h1>
-      <button id="menuToggle" class="menu-toggle">&#9776;</button>
+      <button id="menuToggle" class="menu-toggle" style="display: none;">&#9776;</button>
       <nav id="mainNav" style="display: none;">
         <button id="customersPageButton">Customers</button>
         <button id="loansPageButton">Loans</button>
@@ -44,7 +44,14 @@
               <th>Customer Name</th>
             </tr>
           </thead>
-          <tbody id="customersList"></tbody>
+          <tbody id="customersList">
+            <!-- Example row -->
+            <tr>
+              <td data-label="Customer ID">CUST0001</td>
+              <td data-label="Customer Name">John Doe</td>
+            </tr>
+            <!-- ...existing code... -->
+          </tbody>
         </table>
       </div>
       <div id="loansPage" style="display: none;">
@@ -69,7 +76,18 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="loansList"></tbody>
+          <tbody id="loansList">
+            <!-- Example row -->
+            <tr>
+              <td data-label="Loan ID">LOAN0001</td>
+              <td data-label="Customer ID">CUST0001</td>
+              <td data-label="Loan Amount">$1000</td>
+              <td data-label="Interest Rate">5%</td>
+              <td data-label="Duration">30 days</td>
+              <td data-label="Status">Active</td>
+            </tr>
+            <!-- ...existing code... -->
+          </tbody>
         </table>
       </div>
       <div id="collectionsPage" style="display: none;">
@@ -85,7 +103,20 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="collectionSection"></tbody>
+          <tbody id="collectionSection">
+            <!-- Example row -->
+            <tr>
+              <td data-label="Customer Name">John Doe</td>
+              <td data-label="Loan ID">LOAN0001</td>
+              <td data-label="Start Date">01/01/2023</td>
+              <td data-label="Collected Amount">$500</td>
+              <td data-label="Count">5</td>
+              <td data-label="Action">
+                <button>Collect</button>
+              </td>
+            </tr>
+            <!-- ...existing code... -->
+          </tbody>
         </table>
       </div>
       <div id="adminDashboard" style="display: none;">
@@ -196,8 +227,8 @@
       appState.customers.forEach((customer) => {
         const customerRow = document.createElement('tr');
         customerRow.innerHTML = `
-          <td>${customer.id}</td>
-          <td>${customer.name}</td>
+          <td data-label="Customer ID">${customer.id}</td>
+          <td data-label="Customer Name">${customer.name}</td>
         `;
         customersList.appendChild(customerRow);
       });
@@ -209,12 +240,12 @@
       appState.loans.forEach((loan) => {
         const loanRow = document.createElement('tr');
         loanRow.innerHTML = `
-          <td>${loan.id}</td>
-          <td>${loan.customerId}</td>
-          <td>${loan.loanAmount}</td>
-          <td>${loan.interestRate}</td>
-          <td>${loan.duration}</td>
-          <td>${loan.status}</td>
+          <td data-label="Loan ID">${loan.id}</td>
+          <td data-label="Customer ID">${loan.customerId}</td>
+          <td data-label="Loan Amount">${loan.loanAmount}</td>
+          <td data-label="Interest Rate">${loan.interestRate}</td>
+          <td data-label="Duration">${loan.duration}</td>
+          <td data-label="Status">${loan.status}</td>
         `;
         loansList.appendChild(loanRow);
       });
@@ -235,12 +266,12 @@
         }
         const loanDiv = document.createElement('tr');
         loanDiv.innerHTML = `
-          <td>${customer ? customer.name : 'Unknown'}</td>
-          <td>${loan.id}</td>
-          <td>${new Date(loan.startDate).toLocaleDateString()}</td>
-          <td>${collectedAmount.toFixed(2)}</td>
-          <td>${collections.length}</td>
-          <td>
+          <td data-label="Customer Name">${customer ? customer.name : 'Unknown'}</td>
+          <td data-label="Loan ID">${loan.id}</td>
+          <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
+          <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
+          <td data-label="Count">${collections.length}</td>
+          <td data-label="Action">
             <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
               ${isCollectDisabled ? 'Completed' : 'Collect'}
             </button>
@@ -291,6 +322,39 @@
       showToast('Loan added successfully!');
     });
 
+    function toggleMenu() {
+      const mainNav = document.getElementById('mainNav');
+      mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+
+    function hideMenu() {
+      const mainNav = document.getElementById('mainNav');
+      mainNav.style.display = 'none';
+    }
+
+    document.getElementById('customersPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'block';
+      document.getElementById('loansPage').style.display = 'none';
+      document.getElementById('collectionsPage').style.display = 'none';
+      hideMenu();
+    });
+
+    document.getElementById('loansPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'none';
+      document.getElementById('loansPage').style.display = 'block';
+      document.getElementById('collectionsPage').style.display = 'none';
+      hideMenu();
+    });
+
+    document.getElementById('collectionsPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'none';
+      document.getElementById('loansPage').style.display = 'none';
+      document.getElementById('collectionsPage').style.display = 'block';
+      hideMenu();
+    });
+
     document.getElementById('logoutButton').addEventListener('click', () => {
       // Clear app state and show login screen
       appState = {
@@ -301,6 +365,7 @@
       };
       showToast('You have been logged out.');
       document.getElementById('mainNav').style.display = 'none';
+      document.getElementById('menuToggle').style.display = 'none';
       document.getElementById('customersPage').style.display = 'none';
       document.getElementById('loansPage').style.display = 'none';
       document.getElementById('collectionsPage').style.display = 'none';
@@ -322,6 +387,7 @@
         if (user) {
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('mainNav').style.display = 'block';
+          document.getElementById('menuToggle').style.display = 'block';
           if (user.type === 'admin') {
             document.getElementById('adminDashboard').style.display = 'block';
           } else if (user.type === 'manager') {
@@ -339,31 +405,9 @@
       }
     });
 
-    document.getElementById('customersPageButton').addEventListener('click', () => {
-      document.getElementById('customersPage').style.display = 'block';
-      document.getElementById('loansPage').style.display = 'none';
-      document.getElementById('collectionsPage').style.display = 'none';
-    });
-
-    document.getElementById('loansPageButton').addEventListener('click', () => {
-      document.getElementById('customersPage').style.display = 'none';
-      document.getElementById('loansPage').style.display = 'block';
-      document.getElementById('collectionsPage').style.display = 'none';
-    });
-
-    document.getElementById('collectionsPageButton').addEventListener('click', () => {
-      document.getElementById('customersPage').style.display = 'none';
-      document.getElementById('loansPage').style.display = 'none';
-      document.getElementById('collectionsPage').style.display = 'block';
-    });
-
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      const mainNav = document.getElementById('mainNav');
-      mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
-    });
-
     // Initially show login screen
     document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('menuToggle').style.display = 'none';
     document.getElementById('customersPage').style.display = 'none';
     document.getElementById('loansPage').style.display = 'none';
     document.getElementById('collectionsPage').style.display = 'none';
