@@ -126,6 +126,8 @@ button:hover {
     bottom: 30px;
     font-size: 17px;
     transform: translateX(-50%); /* Ensure center alignment */
+    max-width: 90%; /* Ensure toaster is fully visible on mobile view */
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 .toaster.show {
     visibility: visible;
