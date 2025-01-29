@@ -162,15 +162,16 @@
       collectionSection.innerHTML = '';
       appState.loans.forEach((loan) => {
         const customer = appState.customers.find((c) => c.id === loan.customerId);
+        const dailyCollection = (loan.loanAmount / loan.duration) + (loan.loanAmount * loan.interestRate / 100);
         const collectedAmount = appState.collections
           .filter((collection) => collection.loanId === loan.id)
-          .reduce((total, collection) => total + loan.loanAmount, 0);
+          .reduce((total, collection) => total + dailyCollection, 0);
         const loanDiv = document.createElement('tr');
         loanDiv.innerHTML = `
           <td>${customer ? customer.name : 'Unknown'}</td>
           <td>${loan.id}</td>
           <td>${new Date(loan.startDate).toLocaleDateString()}</td>
-          <td>${collectedAmount}</td>
+          <td>${collectedAmount.toFixed(2)}</td>
           <td><button onclick="handleCollect('${loan.id}')">Collect</button></td>
         `;
         collectionSection.appendChild(loanDiv);
