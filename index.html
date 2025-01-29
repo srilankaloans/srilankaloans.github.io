@@ -7,6 +7,27 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script type="module" src="config.js"></script>
+  <style>
+    /* Add responsive table styles */
+    .responsive-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .responsive-table th, .responsive-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    .responsive-table th {
+      background-color: #f2f2f2;
+      text-align: left;
+    }
+    .responsive-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .responsive-table tr:hover {
+      background-color: #ddd;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -39,7 +60,18 @@
           <button type="submit">Add Loan</button>
         </form>
         <h3>Collections</h3>
-        <div id="collectionSection"></div>
+        <table class="responsive-table" id="collectionTable">
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Loan ID</th>
+              <th>Start Date</th>
+              <th>Collected Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="collectionSection"></tbody>
+        </table>
       </div>
       <div id="adminDashboard" style="display: none;">
         <h2>Admin Dashboard</h2>
@@ -129,12 +161,15 @@
       const collectionSection = document.getElementById('collectionSection');
       collectionSection.innerHTML = '';
       appState.loans.forEach((loan) => {
-        const loanDiv = document.createElement('div');
-        loanDiv.textContent = `Loan ID: ${loan.id}, Customer: ${loan.customerId}, Amount: ${loan.loanAmount}`;
-        const collectButton = document.createElement('button');
-        collectButton.textContent = 'Collect';
-        collectButton.addEventListener('click', () => handleCollect(loan.id));
-        loanDiv.appendChild(collectButton);
+        const customer = appState.customers.find((c) => c.id === loan.customerId);
+        const loanDiv = document.createElement('tr');
+        loanDiv.innerHTML = `
+          <td>${customer ? customer.name : 'Unknown'}</td>
+          <td>${loan.id}</td>
+          <td>${new Date(loan.startDate).toLocaleDateString()}</td>
+          <td>${loan.loanAmount}</td>
+          <td><button onclick="handleCollect('${loan.id}')">Collect</button></td>
+        `;
         collectionSection.appendChild(loanDiv);
       });
     }
@@ -168,7 +203,7 @@
       const interestRate = parseFloat(document.getElementById('interestRate').value);
       const duration = parseInt(document.getElementById('duration').value, 10);
       const loanId = autoGenerateLoanId();
-      appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration });
+      appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration, startDate: new Date().toISOString() });
       await saveData();
       populateCollectionSection();
       alert('Loan added successfully!');
