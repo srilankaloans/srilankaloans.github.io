@@ -70,7 +70,12 @@
   <div id="app">
     <header>
       <h1>Retail Loan Management</h1>
-      <button id="logoutButton">Logout</button>
+      <nav>
+        <button id="customersPageButton">Customers</button>
+        <button id="loansPageButton">Loans</button>
+        <button id="collectionsPageButton">Collections</button>
+        <button id="logoutButton">Logout</button>
+      </nav>
     </header>
     <main>
       <div id="loginScreen" style="display: none;">
@@ -81,13 +86,26 @@
           <button type="submit">Login</button>
         </form>
       </div>
-      <div id="managerDashboard" style="display: none;">
-        <h2>Manager Dashboard</h2>
+      <div id="customersPage" style="display: none;">
+        <h2>Customers</h2>
         <form id="addCustomerForm">
           <h3>Add New Customer</h3>
           <input type="text" id="customerName" placeholder="Customer Name" required />
           <button type="submit">Add Customer</button>
         </form>
+        <h3>Customer List</h3>
+        <table class="responsive-table" id="customersTable">
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Customer Name</th>
+            </tr>
+          </thead>
+          <tbody id="customersList"></tbody>
+        </table>
+      </div>
+      <div id="loansPage" style="display: none;">
+        <h2>Loans</h2>
         <form id="addLoanForm">
           <h3>Add New Loan</h3>
           <select id="customerDropdown" required></select>
@@ -96,7 +114,23 @@
           <input type="number" id="duration" placeholder="Duration (days)" required />
           <button type="submit">Add Loan</button>
         </form>
-        <h3>Collections</h3>
+        <h3>Loan List</h3>
+        <table class="responsive-table" id="loansTable">
+          <thead>
+            <tr>
+              <th>Loan ID</th>
+              <th>Customer ID</th>
+              <th>Loan Amount</th>
+              <th>Interest Rate</th>
+              <th>Duration</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="loansList"></tbody>
+        </table>
+      </div>
+      <div id="collectionsPage" style="display: none;">
+        <h2>Collections</h2>
         <table class="responsive-table" id="collectionTable">
           <thead>
             <tr>
@@ -148,6 +182,8 @@
         const data = await response.json();
         appState = isProduction ? JSON.parse(data.files['data.json'].content) : data;
         populateCustomerDropdown();
+        populateCustomersList();
+        populateLoansList();
         populateCollectionSection();
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -203,6 +239,36 @@
       });
     }
 
+    function populateCustomersList() {
+      const customersList = document.getElementById('customersList');
+      customersList.innerHTML = '';
+      appState.customers.forEach((customer) => {
+        const customerRow = document.createElement('tr');
+        customerRow.innerHTML = `
+          <td>${customer.id}</td>
+          <td>${customer.name}</td>
+        `;
+        customersList.appendChild(customerRow);
+      });
+    }
+
+    function populateLoansList() {
+      const loansList = document.getElementById('loansList');
+      loansList.innerHTML = '';
+      appState.loans.forEach((loan) => {
+        const loanRow = document.createElement('tr');
+        loanRow.innerHTML = `
+          <td>${loan.id}</td>
+          <td>${loan.customerId}</td>
+          <td>${loan.loanAmount}</td>
+          <td>${loan.interestRate}</td>
+          <td>${loan.duration}</td>
+          <td>${loan.status}</td>
+        `;
+        loansList.appendChild(loanRow);
+      });
+    }
+
     function populateCollectionSection() {
       const collectionSection = document.getElementById('collectionSection');
       collectionSection.innerHTML = '';
@@ -251,6 +317,7 @@
       appState.customers.push({ id: customerId, name: customerName });
       await saveData();
       populateCustomerDropdown();
+      populateCustomersList();
       showToast('Customer added successfully!');
     });
 
@@ -264,6 +331,7 @@
       const loanId = autoGenerateLoanId();
       appState.loans.push({ id: loanId, customerId, loanAmount, interestRate, duration, startDate: new Date().toISOString(), status: 'active' });
       await saveData();
+      populateLoansList();
       populateCollectionSection();
       showToast('Loan added successfully!');
     });
@@ -277,8 +345,9 @@
         users: appState.users, // Preserve users
       };
       showToast('You have been logged out.');
-      document.getElementById('managerDashboard').style.display = 'none';
-      document.getElementById('adminDashboard').style.display = 'none';
+      document.getElementById('customersPage').style.display = 'none';
+      document.getElementById('loansPage').style.display = 'none';
+      document.getElementById('collectionsPage').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
     });
 
@@ -299,7 +368,9 @@
           if (user.type === 'admin') {
             document.getElementById('adminDashboard').style.display = 'block';
           } else if (user.type === 'manager') {
-            document.getElementById('managerDashboard').style.display = 'block';
+            document.getElementById('customersPage').style.display = 'block';
+            document.getElementById('loansPage').style.display = 'none';
+            document.getElementById('collectionsPage').style.display = 'none';
             fetchData();
           }
         } else {
@@ -311,9 +382,28 @@
       }
     });
 
+    document.getElementById('customersPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'block';
+      document.getElementById('loansPage').style.display = 'none';
+      document.getElementById('collectionsPage').style.display = 'none';
+    });
+
+    document.getElementById('loansPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'none';
+      document.getElementById('loansPage').style.display = 'block';
+      document.getElementById('collectionsPage').style.display = 'none';
+    });
+
+    document.getElementById('collectionsPageButton').addEventListener('click', () => {
+      document.getElementById('customersPage').style.display = 'none';
+      document.getElementById('loansPage').style.display = 'none';
+      document.getElementById('collectionsPage').style.display = 'block';
+    });
+
     // Initially show login screen
-    document.getElementById('managerDashboard').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'none';
+    document.getElementById('customersPage').style.display = 'none';
+    document.getElementById('loansPage').style.display = 'none';
+    document.getElementById('collectionsPage').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'block';
 
     // Fetch initial data
