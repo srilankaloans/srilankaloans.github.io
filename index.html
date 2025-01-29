@@ -12,6 +12,7 @@
   <div id="app">
     <header>
       <h1>Retail Loan Management</h1>
+      <button id="menuToggle" class="menu-toggle">&#9776;</button>
       <nav id="mainNav" style="display: none;">
         <button id="customersPageButton">Customers</button>
         <button id="loansPageButton">Loans</button>
@@ -354,6 +355,11 @@
       document.getElementById('customersPage').style.display = 'none';
       document.getElementById('loansPage').style.display = 'none';
       document.getElementById('collectionsPage').style.display = 'block';
+    });
+
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      const mainNav = document.getElementById('mainNav');
+      mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
     });
 
     // Initially show login screen
