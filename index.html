@@ -221,11 +221,19 @@
     }
 
     function autoGenerateCustomerId() {
-      return `CUST${Date.now()}`;
+      const maxId = appState.customers.reduce((max, customer) => {
+        const id = parseInt(customer.id.replace('CUST', ''), 10);
+        return id > max ? id : max;
+      }, 0);
+      return `CUST${String(maxId + 1).padStart(4, '0')}`;
     }
 
     function autoGenerateLoanId() {
-      return `LOAN${Date.now()}`;
+      const maxId = appState.loans.reduce((max, loan) => {
+        const id = parseInt(loan.id.replace('LOAN', ''), 10);
+        return id > max ? id : max;
+      }, 0);
+      return `LOAN${String(maxId + 1).padStart(4, '0')}`;
     }
 
     function populateCustomerDropdown() {
