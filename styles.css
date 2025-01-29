@@ -128,6 +128,7 @@ button:hover {
     transform: translateX(-50%); /* Ensure center alignment */
     max-width: 90%; /* Ensure toaster is fully visible on mobile view */
     box-sizing: border-box; /* Include padding in width calculation */
+    margin: 0 auto; /* Center the toaster horizontally */
 }
 .toaster.show {
     visibility: visible;
