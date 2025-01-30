@@ -282,21 +282,24 @@ function closeCollectionDetails() {
 
 document.getElementById('menuToggle').addEventListener('click', toggleMenu);
 
-document.getElementById('customersPageButton').addEventListener('click', () => {
+document.getElementById('customersPageButton').addEventListener('click', async () => {
+  await fetchData();
   document.getElementById('customersPage').style.display = 'block';
   document.getElementById('loansPage').style.display = 'none';
   document.getElementById('collectionsPage').style.display = 'none';
   hideMenu();
 });
 
-document.getElementById('loansPageButton').addEventListener('click', () => {
+document.getElementById('loansPageButton').addEventListener('click', async () => {
+  await fetchData();
   document.getElementById('customersPage').style.display = 'none';
   document.getElementById('loansPage').style.display = 'block';
   document.getElementById('collectionsPage').style.display = 'none';
   hideMenu();
 });
 
-document.getElementById('collectionsPageButton').addEventListener('click', () => {
+document.getElementById('collectionsPageButton').addEventListener('click', async () => {
+  await fetchData();
   document.getElementById('customersPage').style.display = 'none';
   document.getElementById('loansPage').style.display = 'none';
   document.getElementById('collectionsPage').style.display = 'block';

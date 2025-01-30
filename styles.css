@@ -204,6 +204,12 @@ button:hover {
         width: 100%;
         box-sizing: border-box;
     }
+    .action-section input {
+        order: 1;
+    }
+    .action-section button {
+        order: 2;
+    }
 }
 
 /* Add styles for the collection details modal */
@@ -264,4 +270,10 @@ button:hover {
     font-size: 1.5rem;
     cursor: pointer;
     margin-left: 1rem;
+}
+
+/* Add styles for the header-right class */
+.header-right {
+    display: flex;
+    align-items: center;
 }
