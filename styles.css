@@ -195,6 +195,17 @@ button:hover {
     }
 }
 
+@media (max-width: 768px) {
+    .action-section {
+        flex-direction: column;
+        gap: 5px;
+    }
+    .action-section button, .action-section input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
 /* Add styles for the collection details modal */
 .collection-details-modal {
     display: none;
