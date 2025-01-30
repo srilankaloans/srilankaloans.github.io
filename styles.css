@@ -28,6 +28,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 0.5rem; /* Add gap between form elements */
+    overflow: hidden; /* Prevent form overflow */
 }
 input, select {
     width: 100%;
