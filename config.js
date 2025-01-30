@@ -1,6 +1,6 @@
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
-  token: 'g*********hp****_w7************CTV5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
+  token: 'g*********hp****_w7************CTV5P5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
 };
 
 const getToken = () => config.token.split('*').join('');
@@ -291,7 +291,32 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     const response = await fetch(isProduction ? apiUrl : localDataUrl, {
       headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
     });
-    const
+    const data = await response.json();
+    const users = isProduction ? JSON.parse(data.files['data.json'].content).users : data.users;
+    const user = users.find((user) => user.username === username && user.password === password);
+    if (user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
+      document.getElementById('menuToggle').style.display = 'block';
+      if (user.type === 'admin') {
+        document.getElementById('adminDashboard').style.display = 'block';
+      } else if (user.type === 'manager') {
+        document.getElementById('customersPage').style.display = 'block';
+        document.getElementById('loansPage').style.display = 'none';
+        document.getElementById('collectionsPage').style.display = 'none';
+        fetchData();
+        // Hide delete buttons for managers
+        document.querySelectorAll('.delete-loan-button').forEach(button => button.style.display = 'none');
+        document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
+      }
+    } else {
+      showToast('Invalid credentials!');
+    }
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    showToast('Error during login. Please try again.');
+  }
+});
 
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
