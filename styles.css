@@ -228,6 +228,10 @@ button:hover {
     #collectionTable {
         overflow-x: hidden;
     }
+    td.action-section {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .action-section button {
