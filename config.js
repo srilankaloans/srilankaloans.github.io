@@ -126,7 +126,7 @@ function populateLoansList() {
       <td data-label="Duration">${loan.duration}</td>
       <td data-label="Status">${loan.status}</td>
       <td data-label="Action">
-        <button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button>
+        ${appState.currentUser?.type === 'admin' ? `<button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button>` : ''}
       </td>
     `;
     loansList.appendChild(loanRow);
@@ -157,7 +157,7 @@ function populateCollectionSection() {
         <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
           ${isCollectDisabled ? 'Completed' : 'Collect'}
         </button>
-        <button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')">Delete</button>
+        ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')">Delete</button>` : ''}
         <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')">View</button>
       </td>
     `;
@@ -350,10 +350,6 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
         document.getElementById('loansPage').style.display = 'none';
         document.getElementById('collectionsPage').style.display = 'none';
         fetchData();
-        // Hide delete buttons for managers
-        document.querySelectorAll('.delete-loan-button').forEach(button => button.style.display = 'none');
-        document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
-        hideDeleteButtonsForManagers();
       }
     } else {
       showToast('Invalid credentials!');
