@@ -255,3 +255,13 @@ button:hover {
     cursor: pointer;
     float: right;
 }
+
+/* Add styles for the refresh icon in the menu bar */
+.refresh-icon {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-left: 1rem;
+}

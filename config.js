@@ -73,6 +73,11 @@ async function saveData() {
   }
 }
 
+async function refreshData() {
+  await fetchData();
+  showToast('Data refreshed successfully!');
+}
+
 function autoGenerateCustomerId() {
   const maxId = appState.customers.reduce((max, customer) => {
     const id = parseInt(customer.id.replace('CUST', ''), 10);
@@ -359,6 +364,8 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     showToast('Error during login. Please try again.');
   }
 });
+
+document.getElementById('refreshButton').addEventListener('click', refreshData);
 
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
