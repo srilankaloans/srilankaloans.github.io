@@ -1,6 +1,6 @@
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
-  token: 'g*********hp****_w7************CTV5P5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
+  token: 'g*********hp****_w7************CTV5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
 };
 
 const getToken = () => config.token.split('*').join('');
@@ -137,11 +137,10 @@ function populateCollectionSection() {
   collectionSection.innerHTML = '';
   appState.loans.forEach((loan) => {
     const customer = appState.customers.find((c) => c.id === loan.customerId);
-    const dailyAmount = loan.loanAmount / loan.duration;
-    const dailyCollection = dailyAmount + (dailyAmount * loan.interestRate / 100);
     const collections = appState.collections.filter((collection) => collection.loanId === loan.id);
     const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
-    const isCollectDisabled = collections.length >= loan.duration;
+    const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
+    const isCollectDisabled = collectedAmount >= totalAmountDue;
     if (isCollectDisabled) {
       loan.status = 'completed';
     }
@@ -172,6 +171,13 @@ async function handleCollect(loanId) {
     const collectAmount = parseFloat(collectAmountInput.value);
     if (isNaN(collectAmount) || collectAmount <= 0) {
       showToast('Please enter a valid amount.');
+      return;
+    }
+    const collections = appState.collections.filter((collection) => collection.loanId === loanId);
+    const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
+    const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
+    if (collectedAmount + collectAmount > totalAmountDue) {
+      showToast('Collection amount exceeds the total amount due.');
       return;
     }
     appState.collections.push({ loanId, date: new Date().toISOString(), amount: collectAmount });
