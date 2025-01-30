@@ -120,6 +120,7 @@
                 <input type="number" id="collectAmount-LOAN0001" placeholder="Amount" />
                 <button onclick="handleCollect('LOAN0001')">Collect</button>
                 <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">Delete</button>
+                <button onclick="showCollectionDetails('LOAN0001')">Details</button>
               </td>
             </tr>
             <!-- ...existing code... -->
@@ -133,5 +134,8 @@
     </main>
   </div>
   <div id="toaster" class="toaster"></div>
+  <div id="collectionDetailsModal" class="collection-details-modal">
+    <div id="collectionDetailsContent"></div>
+  </div>
 </body>
 </html>

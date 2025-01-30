@@ -158,6 +158,7 @@ function populateCollectionSection() {
           ${isCollectDisabled ? 'Completed' : 'Collect'}
         </button>
         <button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')">Delete</button>
+        <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')">View</button>
       </td>
     `;
     collectionSection.appendChild(loanDiv);
@@ -240,6 +241,38 @@ function hideDeleteButtonsForManagers() {
     const deleteCollectionButtons = document.querySelectorAll('.delete-collection-button');
     deleteCollectionButtons.forEach(button => button.style.display = 'none');
   }
+}
+
+function showCollectionDetails(loanId) {
+  const modal = document.getElementById('collectionDetailsModal');
+  const modalContent = document.getElementById('collectionDetailsContent');
+  const collections = appState.collections.filter(collection => collection.loanId === loanId);
+  modalContent.innerHTML = `
+    <h3>Collections for Loan ID: ${loanId}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${collections.map(collection => `
+          <tr>
+            <td>${new Date(collection.date).toLocaleDateString()}</td>
+            <td>${collection.amount.toFixed(2)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <button class="close-button" onclick="closeCollectionDetails()">Close</button>
+  `;
+  modal.classList.add('show');
+}
+
+function closeCollectionDetails() {
+  const modal = document.getElementById('collectionDetailsModal');
+  modal.classList.remove('show');
 }
 
 document.getElementById('menuToggle').addEventListener('click', toggleMenu);
@@ -336,3 +369,5 @@ window.filterCollections = filterCollections;
 window.handleDeleteCollection = handleDeleteCollection;
 window.hideDeleteButtonsForManagers = hideDeleteButtonsForManagers;
 window.handleCollect = handleCollect;
+window.showCollectionDetails = showCollectionDetails;
+window.closeCollectionDetails = closeCollectionDetails;

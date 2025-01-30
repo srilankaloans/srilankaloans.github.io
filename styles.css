@@ -194,3 +194,53 @@ button:hover {
         flex-direction: row;
     }
 }
+
+/* Add styles for the collection details modal */
+.collection-details-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    max-width: 90%;
+    width: 400px;
+    box-sizing: border-box;
+}
+
+.collection-details-modal.show {
+    display: block;
+}
+
+.collection-details-modal h3 {
+    margin-top: 0;
+}
+
+.collection-details-modal table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.collection-details-modal th, .collection-details-modal td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.collection-details-modal th {
+    background-color: #f2f2f2;
+}
+
+.collection-details-modal .close-button {
+    background-color: #6200ea;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
