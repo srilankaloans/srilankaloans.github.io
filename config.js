@@ -367,6 +367,20 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
 
 document.getElementById('refreshButton').addEventListener('click', refreshData);
 
+document.getElementById('addCustomerForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const customerName = document.getElementById('customerName').value;
+  const newCustomer = {
+    id: autoGenerateCustomerId(),
+    name: customerName,
+  };
+  appState.customers.push(newCustomer);
+  await saveData();
+  showToast(`Customer ${customerName} added successfully!`);
+  populateCustomersList();
+  document.getElementById('addCustomerForm').reset();
+});
+
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
 window.handleDeleteCollection = handleDeleteCollection;
