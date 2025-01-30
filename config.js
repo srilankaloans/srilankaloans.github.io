@@ -381,6 +381,28 @@ document.getElementById('addCustomerForm').addEventListener('submit', async (eve
   document.getElementById('addCustomerForm').reset();
 });
 
+document.getElementById('addLoanForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const customerId = document.getElementById('customerDropdown').value;
+  const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+  const interestRate = parseFloat(document.getElementById('interestRate').value);
+  const duration = parseInt(document.getElementById('duration').value, 10);
+  const newLoan = {
+    id: autoGenerateLoanId(),
+    customerId,
+    loanAmount,
+    interestRate,
+    duration,
+    startDate: new Date().toISOString(),
+    status: 'active',
+  };
+  appState.loans.push(newLoan);
+  await saveData();
+  showToast(`Loan for Customer ID: ${customerId} added successfully!`);
+  populateLoansList();
+  document.getElementById('addLoanForm').reset();
+});
+
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
 window.handleDeleteCollection = handleDeleteCollection;
