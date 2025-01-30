@@ -1,6 +1,6 @@
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
-  token: 'g***hp_g8GAqe***6FNerPk4algf***dt3HHczOzM***uE0zGmEz', // Tampered token
+  token: '***************ghp_******wL*********gD2lN7AaTy********hcrPBqaW**********V8Vfiwq8oM*******47Bgq3', // Tampered token
 };
 
 const getToken = () => config.token.split('*').join('');
