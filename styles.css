@@ -230,7 +230,7 @@ button:hover {
     }
     td.action-section {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
     }
 }
 
