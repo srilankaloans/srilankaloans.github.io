@@ -212,6 +212,10 @@ button:hover {
     .action-section button {
         order: 2;
     }
+    /* Ensure parent container does not cause overflow */
+    #collectionTable {
+        overflow-x: hidden;
+    }
 }
 
 /* Add styles for the collection details modal */
