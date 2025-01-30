@@ -219,6 +219,19 @@ button:hover {
     }
 }
 
+.action-section button {
+    background: none;
+    border: none;
+    color: #6200ea;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0 5px;
+}
+.action-section button:hover {
+    color: #3700b3;
+}
+
 /* Add styles for the collection details modal */
 .collection-details-modal {
     display: none;

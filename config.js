@@ -157,13 +157,15 @@ function populateCollectionSection() {
       <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
       <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
       <td data-label="Count">${collections.length}</td>
-      <td data-label="Action" class="action-section">
+      <td data-label="Amount">
         <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" />
+      </td>
+      <td data-label="Action" class="action-section">
         <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
-          ${isCollectDisabled ? 'Completed' : 'Collect'}
+          <i class="fas fa-hand-holding-usd"></i>
         </button>
-        ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')">Delete</button>` : ''}
-        <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')">View</button>
+        ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
+        <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
       </td>
     `;
     collectionSection.appendChild(loanDiv);

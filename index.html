@@ -108,6 +108,7 @@
               <th>Start Date</th>
               <th>Collected Amount</th>
               <th>Count</th>
+              <th>Amount</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -123,9 +124,16 @@
                 <input type="number" id="collectAmount-LOAN0001" placeholder="Amount" />
               </td>
               <td data-label="Action" class="action-section">
-                <button onclick="handleCollect('LOAN0001')">Collect</button>
-                <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">Delete</button>
-                <button onclick="showCollectionDetails('LOAN0001')">Details</button>
+                <button onclick="handleCollect('LOAN0001')">
+                  <i class="fas fa-hand-holding-usd"></i>
+                </button>
+                <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+                <button onclick="showCollectionDetails('LOAN0001')">
+                  <i class="fas fa-info-circle"></i>
+                </button>
+              </td>
             </tr>
             <!-- ...existing code... -->
           </tbody>
