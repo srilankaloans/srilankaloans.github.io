@@ -1,6 +1,6 @@
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
-  token: 'g*********hp****_w7************CTV5P5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
+  token: 'g*********hp****_w7************CTV5p5xTaUpSC5J**************5T0skZ****Boo7lvx0MknZu', // Tampered token
 };
 
 const getToken = () => config.token.split('*').join('');
@@ -274,6 +274,16 @@ document.getElementById('logoutButton').addEventListener('click', () => {
     users: appState.users, // Preserve users
   };
   showToast('You have been logged out.');
+  document.getElementById('mainNav').style.display = 'none';
+  document.getElementById('menuToggle').style.display = 'none';
+  document.getElementById('customersPage').style.display = 'none';
+  document.getElementById('loansPage').style.display = 'none';
+  document.getElementById('collectionsPage').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'block';
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initially show login screen
   document.getElementById('mainNav').style.display = 'none';
   document.getElementById('menuToggle').style.display = 'none';
   document.getElementById('customersPage').style.display = 'none';
