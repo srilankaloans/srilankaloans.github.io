@@ -117,6 +117,7 @@
               <td data-label="Collected Amount">$500</td>
               <td data-label="Count">5</td>
               <td data-label="Action">
+                <input type="number" id="collectAmount-LOAN0001" placeholder="Amount" />
                 <button onclick="handleCollect('LOAN0001')">Collect</button>
                 <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">Delete</button>
               </td>
@@ -268,7 +269,7 @@
         const dailyAmount = loan.loanAmount / loan.duration;
         const dailyCollection = dailyAmount + (dailyAmount * loan.interestRate / 100);
         const collections = appState.collections.filter((collection) => collection.loanId === loan.id);
-        const collectedAmount = collections.reduce((total, collection) => total + dailyCollection, 0);
+        const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
         const isCollectDisabled = collections.length >= loan.duration;
         if (isCollectDisabled) {
           loan.status = 'completed';
@@ -281,6 +282,7 @@
           <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
           <td data-label="Count">${collections.length}</td>
           <td data-label="Action">
+            <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" />
             <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
               ${isCollectDisabled ? 'Completed' : 'Collect'}
             </button>
@@ -295,7 +297,13 @@
       const confirmed = confirm('Are you sure you want to collect for this loan?');
       if (confirmed) {
         const loan = appState.loans.find((l) => l.id === loanId);
-        appState.collections.push({ loanId, date: new Date().toISOString() });
+        const collectAmountInput = document.getElementById(`collectAmount-${loanId}`);
+        const collectAmount = parseFloat(collectAmountInput.value);
+        if (isNaN(collectAmount) || collectAmount <= 0) {
+          showToast('Please enter a valid amount.');
+          return;
+        }
+        appState.collections.push({ loanId, date: new Date().toISOString(), amount: collectAmount });
         await saveData();
         showToast(`Collection recorded for Loan ID: ${loanId}`);
         populateCollectionSection(); // Update the collection section
