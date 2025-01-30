@@ -17,6 +17,7 @@ let appState = {
   loans: [],
   collections: [],
   users: [], // Add users to the app state
+  currentUser: null, // Track the current user
 };
 
 function showToast(message) {
@@ -272,6 +273,7 @@ document.getElementById('logoutButton').addEventListener('click', () => {
     loans: [],
     collections: [],
     users: appState.users, // Preserve users
+    currentUser: null,
   };
   showToast('You have been logged out.');
   document.getElementById('mainNav').style.display = 'none';
@@ -305,6 +307,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     const users = isProduction ? JSON.parse(data.files['data.json'].content).users : data.users;
     const user = users.find((user) => user.username === username && user.password === password);
     if (user) {
+      appState.currentUser = user;
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
       document.getElementById('menuToggle').style.display = 'block';
