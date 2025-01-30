@@ -213,6 +213,9 @@ button:hover {
     .action-section button {
         order: 2;
     }
+    .action-section button + button {
+        margin-top: 5px; /* Add margin between buttons */
+    }
     /* Ensure parent container does not cause overflow */
     #collectionTable {
         overflow-x: hidden;
