@@ -158,17 +158,24 @@ function populateCollectionSection() {
       <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
       <td data-label="Count">${collections.length}</td>
       <td data-label="Amount">
-        <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" />
+        <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" required />
       </td>
       <td data-label="Action" class="action-section">
         <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
-          <i class="fas fa-hand-holding-usd"></i>
+          <i class="${isCollectDisabled ? 'fas fa-check-circle' : 'fas fa-hand-holding-usd'}"></i>
         </button>
         ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
         <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
       </td>
     `;
     collectionSection.appendChild(loanDiv);
+
+    // Disable collect button if amount is not filled
+    const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
+    const collectButton = loanDiv.querySelector('button');
+    collectAmountInput.addEventListener('input', () => {
+      collectButton.disabled = !collectAmountInput.value || parseFloat(collectAmountInput.value) <= 0;
+    });
   });
   hideDeleteButtonsForManagers();
 }
