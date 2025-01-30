@@ -200,6 +200,7 @@ button:hover {
         flex-direction: column;
         gap: 5px;
         align-items: stretch; /* Ensure buttons and input take full width */
+        overflow: hidden; /* Prevent horizontal scrolling */
     }
     .action-section button, .action-section input {
         width: 100%;
