@@ -260,12 +260,16 @@ function filterNotCollectedToday() {
   const today = new Date().toLocaleDateString();
   for (let i = 0; i < rows.length; i++) {
     const loanIdCell = rows[i].getElementsByTagName('td')[1];
-    const lastCollectedDateCell = rows[i].getElementsByTagName('td')[2];
-    if (loanIdCell && lastCollectedDateCell) {
+    if (loanIdCell) {
       const loanId = loanIdCell.textContent || loanIdCell.innerText;
       const loan = appState.loans.find((l) => l.id === loanId);
-      const lastCollectedDate = lastCollectedDateCell.textContent || lastCollectedDateCell.innerText;
-      rows[i].style.display = (loan.status === 'completed' || lastCollectedDate === today) ? 'none' : '';
+      const collections = appState.collections.filter((collection) => collection.loanId === loanId);
+      const latestCollection = collections.reduce((latest, collection) => {
+        const collectionDate = new Date(collection.date);
+        return collectionDate > latest ? collectionDate : latest;
+      }, new Date(0));
+      const latestCollectionDate = latestCollection.toLocaleDateString();
+      rows[i].style.display = (loan.status === 'completed' || latestCollectionDate === today) ? 'none' : '';
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
