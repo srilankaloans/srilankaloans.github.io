@@ -158,7 +158,7 @@ function populateCollectionSection() {
       <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
       <td data-label="Count">${collections.length}</td>
       <td data-label="Amount">
-        <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" required />
+        <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
       </td>
       <td data-label="Action" class="action-section">
         <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
@@ -237,6 +237,7 @@ function filterCollections() {
       rows[i].style.display = loanId.toLowerCase().indexOf(filterLoanId) > -1 ? '' : 'none';
     }
   }
+  document.getElementById('clearFilters').style.display = 'inline-block';
 }
 
 function filterNotCompleted() {
@@ -249,6 +250,7 @@ function filterNotCompleted() {
       rows[i].style.display = status.toLowerCase() === 'completed' ? 'none' : '';
     }
   }
+  document.getElementById('clearFilters').style.display = 'inline-block';
 }
 
 function filterNotCollectedToday() {
@@ -262,6 +264,16 @@ function filterNotCollectedToday() {
       rows[i].style.display = lastCollectedDate === today ? 'none' : '';
     }
   }
+  document.getElementById('clearFilters').style.display = 'inline-block';
+}
+
+function clearFilters() {
+  const collectionSection = document.getElementById('collectionSection');
+  const rows = collectionSection.getElementsByTagName('tr');
+  for (let i = 0; i < rows.length; i++) {
+    rows[i].style.display = '';
+  }
+  document.getElementById('clearFilters').style.display = 'none';
 }
 
 function toggleMenu() {
@@ -449,3 +461,4 @@ window.showCollectionDetails = showCollectionDetails;
 window.closeCollectionDetails = closeCollectionDetails;
 window.filterNotCompleted = filterNotCompleted;
 window.filterNotCollectedToday = filterNotCollectedToday;
+window.clearFilters = clearFilters;

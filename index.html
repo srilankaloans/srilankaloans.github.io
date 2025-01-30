@@ -101,8 +101,9 @@
       <div id="collectionsPage" style="display: none;">
         <h2>Collections</h2>
         <div class="filter-options">
-          <button onclick="filterNotCompleted()">Not Completed</button>
-          <button onclick="filterNotCollectedToday()">Not Collected Today</button>
+          <button id="notCompletedFilter" onclick="filterNotCompleted()">Not Completed</button>
+          <button id="notCollectedTodayFilter" onclick="filterNotCollectedToday()">Not Collected Today</button>
+          <button id="clearFilters" onclick="clearFilters()" style="display: none;">Clear Filters</button>
         </div>
         <table class="responsive-table" id="collectionTable">
           <thead>
