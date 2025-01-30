@@ -192,7 +192,11 @@ button:hover {
 }
 @media (min-width: 600px) {
     .action-section {
+        display: flex;
         flex-direction: row;
+        gap: 5px;
+        align-items: stretch; /* Ensure buttons and input take full width */
+        overflow: hidden; /* Prevent horizontal scrolling */
     }
 }
 

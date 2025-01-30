@@ -100,7 +100,10 @@
       </div>
       <div id="collectionsPage" style="display: none;">
         <h2>Collections</h2>
-        <input type="text" id="filterLoanId" placeholder="Filter by Loan ID" oninput="filterCollections()" />
+        <div class="filter-options">
+          <button onclick="filterNotCompleted()">Not Completed</button>
+          <button onclick="filterNotCollectedToday()">Not Collected Today</button>
+        </div>
         <table class="responsive-table" id="collectionTable">
           <thead>
             <tr>

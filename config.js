@@ -239,6 +239,31 @@ function filterCollections() {
   }
 }
 
+function filterNotCompleted() {
+  const collectionSection = document.getElementById('collectionSection');
+  const rows = collectionSection.getElementsByTagName('tr');
+  for (let i = 0; i < rows.length; i++) {
+    const statusCell = rows[i].getElementsByTagName('td')[5];
+    if (statusCell) {
+      const status = statusCell.textContent || statusCell.innerText;
+      rows[i].style.display = status.toLowerCase() === 'completed' ? 'none' : '';
+    }
+  }
+}
+
+function filterNotCollectedToday() {
+  const collectionSection = document.getElementById('collectionSection');
+  const rows = collectionSection.getElementsByTagName('tr');
+  const today = new Date().toLocaleDateString();
+  for (let i = 0; i < rows.length; i++) {
+    const lastCollectedDateCell = rows[i].getElementsByTagName('td')[2];
+    if (lastCollectedDateCell) {
+      const lastCollectedDate = lastCollectedDateCell.textContent || lastCollectedDateCell.innerText;
+      rows[i].style.display = lastCollectedDate === today ? 'none' : '';
+    }
+  }
+}
+
 function toggleMenu() {
   const mainNav = document.getElementById('mainNav');
   mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
@@ -422,3 +447,5 @@ window.hideDeleteButtonsForManagers = hideDeleteButtonsForManagers;
 window.handleCollect = handleCollect;
 window.showCollectionDetails = showCollectionDetails;
 window.closeCollectionDetails = closeCollectionDetails;
+window.filterNotCompleted = filterNotCompleted;
+window.filterNotCollectedToday = filterNotCollectedToday;
