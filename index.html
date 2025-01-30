@@ -87,7 +87,7 @@
               <td data-label="Duration">30 days</td>
               <td data-label="Status">Active</td>
               <td data-label="Action">
-                <button onclick="handleDeleteLoan('LOAN0001')">Delete</button>
+                <button class="delete-loan-button" onclick="handleDeleteLoan('LOAN0001')">Delete</button>
               </td>
             </tr>
             <!-- ...existing code... -->
@@ -117,7 +117,8 @@
               <td data-label="Collected Amount">$500</td>
               <td data-label="Count">5</td>
               <td data-label="Action">
-                <button onclick="handleDeleteCollection('LOAN0001')">Delete</button>
+                <button onclick="handleCollect('LOAN0001')">Collect</button>
+                <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">Delete</button>
               </td>
             </tr>
             <!-- ...existing code... -->
@@ -252,7 +253,7 @@
           <td data-label="Duration">${loan.duration}</td>
           <td data-label="Status">${loan.status}</td>
           <td data-label="Action">
-            <button onclick="handleDeleteLoan('${loan.id}')">Delete</button>
+            <button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button>
           </td>
         `;
         loansList.appendChild(loanRow);
@@ -283,7 +284,7 @@
             <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
               ${isCollectDisabled ? 'Completed' : 'Collect'}
             </button>
-            <button onclick="handleDeleteCollection('${loan.id}')">Delete</button>
+            <button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')">Delete</button>
           </td>
         `;
         collectionSection.appendChild(loanDiv);
@@ -442,6 +443,9 @@
             document.getElementById('loansPage').style.display = 'none';
             document.getElementById('collectionsPage').style.display = 'none';
             fetchData();
+            // Hide delete buttons for managers
+            document.querySelectorAll('.delete-loan-button').forEach(button => button.style.display = 'none');
+            document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
           }
         } else {
           showToast('Invalid credentials!');

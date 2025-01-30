@@ -43,6 +43,17 @@ async function handleDeleteCollection(loanId) {
   }
 }
 
+function hideDeleteButtonsForManagers() {
+  const userType = appState.currentUser.type;
+  if (userType === 'manager') {
+    const deleteLoanButtons = document.querySelectorAll('.delete-loan-button');
+    const deleteCollectionButtons = document.querySelectorAll('.delete-collection-button');
+    deleteLoanButtons.forEach(button => button.style.display = 'none');
+    deleteCollectionButtons.forEach(button => button.style.display = 'none');
+  }
+}
+
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
 window.handleDeleteCollection = handleDeleteCollection;
+window.hideDeleteButtonsForManagers = hideDeleteButtonsForManagers;
