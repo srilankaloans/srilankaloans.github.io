@@ -259,10 +259,13 @@ function filterNotCollectedToday() {
   const rows = collectionSection.getElementsByTagName('tr');
   const today = new Date().toLocaleDateString();
   for (let i = 0; i < rows.length; i++) {
+    const loanIdCell = rows[i].getElementsByTagName('td')[1];
     const lastCollectedDateCell = rows[i].getElementsByTagName('td')[2];
-    if (lastCollectedDateCell) {
+    if (loanIdCell && lastCollectedDateCell) {
+      const loanId = loanIdCell.textContent || loanIdCell.innerText;
+      const loan = appState.loans.find((l) => l.id === loanId);
       const lastCollectedDate = lastCollectedDateCell.textContent || lastCollectedDateCell.innerText;
-      rows[i].style.display = lastCollectedDate === today ? 'none' : '';
+      rows[i].style.display = (loan.status === 'completed' || lastCollectedDate === today) ? 'none' : '';
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
