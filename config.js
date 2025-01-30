@@ -244,10 +244,11 @@ function filterNotCompleted() {
   const collectionSection = document.getElementById('collectionSection');
   const rows = collectionSection.getElementsByTagName('tr');
   for (let i = 0; i < rows.length; i++) {
-    const statusCell = rows[i].getElementsByTagName('td')[5];
-    if (statusCell) {
-      const status = statusCell.textContent || statusCell.innerText;
-      rows[i].style.display = status.toLowerCase() === 'completed' ? 'none' : '';
+    const loanIdCell = rows[i].getElementsByTagName('td')[1];
+    if (loanIdCell) {
+      const loanId = loanIdCell.textContent || loanIdCell.innerText;
+      const loan = appState.loans.find((l) => l.id === loanId);
+      rows[i].style.display = loan.status === 'completed' ? 'none' : '';
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
