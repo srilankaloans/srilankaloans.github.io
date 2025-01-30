@@ -199,6 +199,7 @@ button:hover {
     .action-section {
         flex-direction: column;
         gap: 5px;
+        align-items: flex-start; /* Ensure buttons align to the left */
     }
     .action-section button, .action-section input {
         width: 100%;
