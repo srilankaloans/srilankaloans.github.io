@@ -152,7 +152,7 @@ function populateCollectionSection() {
       <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
       <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
       <td data-label="Count">${collections.length}</td>
-      <td data-label="Action">
+      <td data-label="Action" class="action-section">
         <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" />
         <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
           ${isCollectDisabled ? 'Completed' : 'Collect'}
@@ -162,6 +162,7 @@ function populateCollectionSection() {
     `;
     collectionSection.appendChild(loanDiv);
   });
+  hideDeleteButtonsForManagers();
 }
 
 async function handleCollect(loanId) {
@@ -234,11 +235,9 @@ function hideMenu() {
 }
 
 function hideDeleteButtonsForManagers() {
-  const userType = appState.currentUser.type;
+  const userType = appState.currentUser?.type;
   if (userType === 'manager') {
-    const deleteLoanButtons = document.querySelectorAll('.delete-loan-button');
     const deleteCollectionButtons = document.querySelectorAll('.delete-collection-button');
-    deleteLoanButtons.forEach(button => button.style.display = 'none');
     deleteCollectionButtons.forEach(button => button.style.display = 'none');
   }
 }
@@ -321,6 +320,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
         // Hide delete buttons for managers
         document.querySelectorAll('.delete-loan-button').forEach(button => button.style.display = 'none');
         document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
+        hideDeleteButtonsForManagers();
       }
     } else {
       showToast('Invalid credentials!');

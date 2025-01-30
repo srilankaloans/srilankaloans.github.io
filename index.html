@@ -12,8 +12,8 @@
   <div id="app">
     <header>
       <h1>Sri Lanka Loans</h1>
-      <button id="menuToggle" class="menu-toggle" style="display: none;">&#9776;</button>
-      <nav id="mainNav" style="display: none;">
+      <button id="menuToggle" class="menu-toggle">&#9776;</button>
+      <nav id="mainNav">
         <button id="customersPageButton">Customers</button>
         <button id="loansPageButton">Loans</button>
         <button id="collectionsPageButton">Collections</button>
@@ -86,7 +86,7 @@
               <td data-label="Interest Rate">5%</td>
               <td data-label="Duration">30 days</td>
               <td data-label="Status">Active</td>
-              <td data-label="Action">
+              <td data-label="Action" class="action-section">
                 <button class="delete-loan-button" onclick="handleDeleteLoan('LOAN0001')">Delete</button>
               </td>
             </tr>
@@ -116,7 +116,7 @@
               <td data-label="Start Date">01/01/2023</td>
               <td data-label="Collected Amount">$500</td>
               <td data-label="Count">5</td>
-              <td data-label="Action">
+              <td data-label="Action" class="action-section">
                 <input type="number" id="collectAmount-LOAN0001" placeholder="Amount" />
                 <button onclick="handleCollect('LOAN0001')">Collect</button>
                 <button class="delete-collection-button" onclick="handleDeleteCollection('LOAN0001')">Delete</button>

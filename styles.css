@@ -182,3 +182,15 @@ button:hover {
         border-top: 1px solid #fff;
     }
 }
+
+/* Add styles to make the action section mobile-friendly */
+.action-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+@media (min-width: 600px) {
+    .action-section {
+        flex-direction: row;
+    }
+}
