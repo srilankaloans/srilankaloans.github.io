@@ -332,6 +332,7 @@ function showCollectionDetails(loanId) {
   const modal = document.getElementById('collectionDetailsModal');
   const modalContent = document.getElementById('collectionDetailsContent');
   const collections = appState.collections.filter(collection => collection.loanId === loanId);
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   modalContent.innerHTML = `
     <h3>Collections for Loan ID: ${loanId}</h3>
     <table>
@@ -339,6 +340,7 @@ function showCollectionDetails(loanId) {
         <tr>
           <th>Date</th>
           <th>Amount</th>
+          ${currentUser?.type === 'admin' ? '<th>Action</th>' : ''}
         </tr>
       </thead>
       <tbody>
@@ -346,6 +348,7 @@ function showCollectionDetails(loanId) {
           <tr>
             <td>${new Date(collection.date).toLocaleDateString()}</td>
             <td>${collection.amount.toFixed(2)}</td>
+            ${currentUser?.type === 'admin' ? `<td><button onclick="handleDeleteCollectionItem('${collection.loanId}', '${collection.date}')"><i class="fas fa-trash-alt"></i></button></td>` : ''}
           </tr>
         `).join('')}
       </tbody>
@@ -354,6 +357,18 @@ function showCollectionDetails(loanId) {
   `;
   modal.classList.add('show');
 }
+
+async function handleDeleteCollectionItem(loanId, date) {
+  const confirmed = confirm('Are you sure you want to delete this collection item?');
+  if (confirmed) {
+    appState.collections = appState.collections.filter(collection => !(collection.loanId === loanId && collection.date === date));
+    await saveData();
+    showToast(`Collection item for Loan ID: ${loanId} deleted successfully!`);
+    showCollectionDetails(loanId); // Refresh the collection details view
+  }
+}
+
+window.handleDeleteCollectionItem = handleDeleteCollectionItem;
 
 function closeCollectionDetails() {
   const modal = document.getElementById('collectionDetailsModal');
