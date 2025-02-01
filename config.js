@@ -1,4 +1,4 @@
-import sha256 from 'https://cdn.skypack.dev/crypto-js/sha256';
+import sha256 from 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js';
 
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
