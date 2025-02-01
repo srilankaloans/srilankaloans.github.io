@@ -1,5 +1,3 @@
-import sha256 from 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js';
-
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
   token: 'g***hp_H9j6LzM*****HhJzrFl*************dbwYfCxugKZ0************uZag0aOGpe', // Tampered token
@@ -395,7 +393,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   // Perform login validation here
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
-  const hashedPassword = sha256(password).toString();
+  const hashedPassword = CryptoJS.SHA256(password).toString();
   try {
     const response = await fetch(isProduction ? apiUrl : localDataUrl, {
       headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
