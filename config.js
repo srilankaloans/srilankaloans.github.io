@@ -2,12 +2,13 @@ const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610',
   gistFileName: 'data.json',
   token: 'g***hp_H9j6LzM*****HhJzrFl*************dbwYfCxugKZ0************uZag0aOGpe', // Tampered token
+  commitVersion: '1.0.0' // Increment this value for each commit
 };
 //7db36bae46a98a48170c6f648b8c9d2e -> testdata.json
 //2886a159d1e20d6aa2561bea3effe610 -> data.json
 const getToken = () => config.token.split('*').join('');
-export { config, getToken };
 const apiUrl = `https://api.github.com/gists/${config.gistId}`;
+export { config, getToken, apiUrl };
 
 let appState = {
   customers: [],
@@ -480,11 +481,13 @@ if (loginForm) {
         if (user.type === 'admin') {
           document.getElementById('adminDashboard').style.display = 'block';
         } else if (user.type === 'manager') {
-          document.getElementById('customersPage').style.display = 'block';
+          document.getElementById('adminDashboard').style.display = 'none';
+          document.getElementById('customersPage').style.display = 'none';
           document.getElementById('loansPage').style.display = 'none';
-          document.getElementById('collectionsPage').style.display = 'none';
-          fetchData();
+
         }
+        document.getElementById('collectionsPage').style.display = 'block';
+        fetchData();
       } else {
         showToast('Invalid credentials!');
       }

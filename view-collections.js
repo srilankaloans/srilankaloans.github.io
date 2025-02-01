@@ -1,6 +1,5 @@
-import { config, getToken } from './config.js';
+import { config, getToken, apiUrl } from './config.js';
 
-const apiUrl = `https://api.github.com/gists/${config.gistId}`;
 
 async function fetchData() {
   try {

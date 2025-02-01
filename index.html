@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-  <script type="module" src="config.js?cacheBust=${Math.random()}"></script>
 </head>
 <body>
   <div id="app">
@@ -166,6 +165,6 @@
     <div id="qrCodeContent"></div>
     <button class="close-button" onclick="closeQRCodeModal()">Close</button>
   </div>
-  <script type="module" src="config.js?cacheBust=${Math.random()}"></script>
+  <script type="module" src="config.js?cacheBust=${config.commitVersion}"></script>
 </body>
 </html>

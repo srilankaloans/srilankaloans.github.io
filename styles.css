@@ -314,6 +314,9 @@ button:hover {
 }
 
 /* Add styles for the filter buttons to indicate when a filter is applied */
+.filter-options {
+    margin-bottom: 1rem; /* Add space between filter buttons and table */
+}
 .filter-options button {
     margin-right: 10px;
     padding: 0.5rem 1rem;
