@@ -300,8 +300,8 @@ function filterNotCompleted() {
     const loanIdCell = rows[i].getElementsByTagName('td')[1];
     if (loanIdCell) {
       const loanId = loanIdCell.textContent || loanIdCell.innerText;
-      const loan = appState.loans.find((l) => l.id === loanId);
-      rows[i].style.display = loan.status === 'completed' ? 'none' : '';
+      const loan = appState.customers.flatMap(customer => customer.loans || []).find(l => l.id === loanId);
+      rows[i].style.display = loan?.status === 'completed' ? 'none' : '';
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
@@ -315,14 +315,14 @@ function filterNotCollectedToday() {
     const loanIdCell = rows[i].getElementsByTagName('td')[1];
     if (loanIdCell) {
       const loanId = loanIdCell.textContent || loanIdCell.innerText;
-      const loan = appState.loans.find((l) => l.id === loanId);
-      const collections = loan.collections;
+      const loan = appState.customers.flatMap(customer => customer.loans || []).find(l => l.id === loanId);
+      const collections = loan?.collections || [];
       const latestCollection = collections.reduce((latest, collection) => {
         const collectionDate = new Date(collection.date);
         return collectionDate > latest ? collectionDate : latest;
       }, new Date(0));
       const latestCollectionDate = latestCollection.toLocaleDateString();
-      rows[i].style.display = (loan.status === 'completed' || latestCollectionDate === today) ? 'none' : '';
+      rows[i].style.display = (loan?.status === 'completed' || latestCollectionDate === today) ? 'none' : '';
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
@@ -339,19 +339,18 @@ function clearFilters() {
 
 function toggleMenu() {
   const mainNav = document.getElementById('mainNav');
-  mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
+  if (mainNav) mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
 }
 
 function hideMenu() {
   const mainNav = document.getElementById('mainNav');
-  mainNav.style.display = 'none';
+  if (mainNav) mainNav.style.display = 'none';
 }
 
 function hideDeleteButtonsForManagers() {
   const userType = appState.currentUser?.type;
   if (userType === 'manager') {
-    const deleteCollectionButtons = document.querySelectorAll('.delete-collection-button');
-    deleteCollectionButtons.forEach(button => button.style.display = 'none');
+    document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
   }
 }
 
@@ -441,17 +440,18 @@ function closeQRCodeModal() {
 
 // Add checks to ensure the elements exist before adding event listeners
 const menuToggle = document.getElementById('menuToggle');
-if (menuToggle) {
-  menuToggle.addEventListener('click', toggleMenu);
-}
+if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
 
 const customersPageButton = document.getElementById('customersPageButton');
 if (customersPageButton) {
   customersPageButton.addEventListener('click', async () => {
     await fetchData();
-    document.getElementById('customersPage').style.display = 'block';
-    document.getElementById('loansPage').style.display = 'none';
-    document.getElementById('collectionsPage').style.display = 'none';
+    const customersPage = document.getElementById('customersPage');
+    const loansPage = document.getElementById('loansPage');
+    const collectionsPage = document.getElementById('collectionsPage');
+    if (customersPage) customersPage.style.display = 'block';
+    if (loansPage) loansPage.style.display = 'none';
+    if (collectionsPage) collectionsPage.style.display = 'none';
     hideMenu();
   });
 }
@@ -460,9 +460,12 @@ const loansPageButton = document.getElementById('loansPageButton');
 if (loansPageButton) {
   loansPageButton.addEventListener('click', async () => {
     await fetchData();
-    document.getElementById('customersPage').style.display = 'none';
-    document.getElementById('loansPage').style.display = 'block';
-    document.getElementById('collectionsPage').style.display = 'none';
+    const customersPage = document.getElementById('customersPage');
+    const loansPage = document.getElementById('loansPage');
+    const collectionsPage = document.getElementById('collectionsPage');
+    if (customersPage) customersPage.style.display = 'none';
+    if (loansPage) loansPage.style.display = 'block';
+    if (collectionsPage) collectionsPage.style.display = 'none';
     hideMenu();
   });
 }
@@ -471,9 +474,12 @@ const collectionsPageButton = document.getElementById('collectionsPageButton');
 if (collectionsPageButton) {
   collectionsPageButton.addEventListener('click', async () => {
     await fetchData();
-    document.getElementById('customersPage').style.display = 'none';
-    document.getElementById('loansPage').style.display = 'none';
-    document.getElementById('collectionsPage').style.display = 'block';
+    const customersPage = document.getElementById('customersPage');
+    const loansPage = document.getElementById('loansPage');
+    const collectionsPage = document.getElementById('collectionsPage');
+    if (customersPage) customersPage.style.display = 'none';
+    if (loansPage) loansPage.style.display = 'none';
+    if (collectionsPage) collectionsPage.style.display = 'block';
     hideMenu();
   });
 }
@@ -489,23 +495,35 @@ if (logoutButton) {
     };
     localStorage.removeItem('currentUser'); // Clear currentUser from localStorage
     showToast('You have been logged out.');
-    document.getElementById('mainNav').style.display = 'none';
-    document.getElementById('menuToggle').style.display = 'none';
-    document.getElementById('customersPage').style.display = 'none';
-    document.getElementById('loansPage').style.display = 'none';
-    document.getElementById('collectionsPage').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'block';
+    const mainNav = document.getElementById('mainNav');
+    const menuToggle = document.getElementById('menuToggle');
+    const customersPage = document.getElementById('customersPage');
+    const loansPage = document.getElementById('loansPage');
+    const collectionsPage = document.getElementById('collectionsPage');
+    const loginScreen = document.getElementById('loginScreen');
+    if (mainNav) mainNav.style.display = 'none';
+    if (menuToggle) menuToggle.style.display = 'none';
+    if (customersPage) customersPage.style.display = 'none';
+    if (loansPage) loansPage.style.display = 'none';
+    if (collectionsPage) collectionsPage.style.display = 'none';
+    if (loginScreen) loginScreen.style.display = 'block';
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initially show login screen
-  if (document.getElementById('mainNav')) document.getElementById('mainNav').style.display = 'none';
-  if (document.getElementById('menuToggle')) document.getElementById('menuToggle').style.display = 'none';
-  if (document.getElementById('customersPage')) document.getElementById('customersPage').style.display = 'none';
-  document.getElementById('loansPage').style.display = 'none';
-  if (document.getElementById('collectionsPage')) document.getElementById('collectionsPage').style.display = 'none';
-  if (document.getElementById('loginScreen')) document.getElementById('loginScreen').style.display = 'block';
+  const mainNav = document.getElementById('mainNav');
+  const menuToggle = document.getElementById('menuToggle');
+  const customersPage = document.getElementById('customersPage');
+  const loansPage = document.getElementById('loansPage');
+  const collectionsPage = document.getElementById('collectionsPage');
+  const loginScreen = document.getElementById('loginScreen');
+  if (mainNav) mainNav.style.display = 'none';
+  if (menuToggle) menuToggle.style.display = 'none';
+  if (customersPage) customersPage.style.display = 'none';
+  if (loansPage) loansPage.style.display = 'none';
+  if (collectionsPage) collectionsPage.style.display = 'none';
+  if (loginScreen) loginScreen.style.display = 'block';
 });
 
 const loginForm = document.getElementById('loginForm');
@@ -526,18 +544,24 @@ if (loginForm) {
       if (user) {
         appState.currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user)); // Store currentUser in localStorage
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
-        document.getElementById('menuToggle').style.display = 'block';
+        const loginScreen = document.getElementById('loginScreen');
+        const mainNav = document.getElementById('mainNav');
+        const menuToggle = document.getElementById('menuToggle');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const customersPage = document.getElementById('customersPage');
+        const loansPage = document.getElementById('loansPage');
+        const collectionsPage = document.getElementById('collectionsPage');
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (mainNav) mainNav.style.display = 'none'; // Ensure menu is collapsed initially
+        if (menuToggle) menuToggle.style.display = 'block';
         if (user.type === 'admin') {
-          document.getElementById('adminDashboard').style.display = 'block';
+          if (adminDashboard) adminDashboard.style.display = 'block';
         } else if (user.type === 'manager') {
-          document.getElementById('adminDashboard').style.display = 'none';
-          document.getElementById('customersPage').style.display = 'none';
-          document.getElementById('loansPage').style.display = 'none';
-
+          if (adminDashboard) adminDashboard.style.display = 'none';
+          if (customersPage) customersPage.style.display = 'none';
+          if (loansPage) loansPage.style.display = 'none';
         }
-        document.getElementById('collectionsPage').style.display = 'block';
+        if (collectionsPage) collectionsPage.style.display = 'block';
         fetchData();
       } else {
         showToast('Invalid credentials!');
@@ -550,9 +574,7 @@ if (loginForm) {
 }
 
 const refreshButton = document.getElementById('refreshButton');
-if (refreshButton) {
-  refreshButton.addEventListener('click', refreshData);
-}
+if (refreshButton) refreshButton.addEventListener('click', refreshData);
 
 const addCustomerForm = document.getElementById('addCustomerForm');
 if (addCustomerForm) {
@@ -568,7 +590,7 @@ if (addCustomerForm) {
     await saveData();
     showToast(`Customer ${customerName} added successfully!`);
     populateCustomersList();
-    document.getElementById('addCustomerForm').reset();
+    addCustomerForm.reset();
   });
 }
 
@@ -603,7 +625,7 @@ if (addLoanForm) {
       await saveData();
       showToast(`Loan for Customer ID: ${customerId} added successfully!`);
       populateLoansList();
-      document.getElementById('addLoanForm').reset();
+      addLoanForm.reset();
     } else {
       showToast('Customer not found.');
     }
@@ -629,14 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (currentUser?.type === 'admin') {
     const customerActionHeader = document.getElementById('customerActionHeader');
-    if (customerActionHeader) {
-      customerActionHeader.style.display = '';
-    }
+    if (customerActionHeader) customerActionHeader.style.display = '';
     document.querySelectorAll('#customersList td[data-label="Action"]').forEach(td => td.style.display = '');
     const loanActionHeader = document.getElementById('loanActionHeader');
-    if (loanActionHeader) {
-      loanActionHeader.style.display = '';
-    }
+    if (loanActionHeader) loanActionHeader.style.display = '';
     document.querySelectorAll('#loansList td[data-label="Action"]').forEach(td => td.style.display = '');
   }
 });

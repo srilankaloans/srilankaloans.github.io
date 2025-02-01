@@ -6,7 +6,7 @@ async function fetchData() {
       headers: { Authorization: `token ${getToken()}` },
     });
     const data = await response.json();
-    return JSON.parse(data.files[config.gistFileName].content);
+    return JSON.parse(data.files[config.gistFileName]?.content || '{}');
   } catch (error) {
     console.error('Error fetching data:', error);
     return null;
@@ -14,15 +14,15 @@ async function fetchData() {
 }
 
 function populateCollections(loanId, customers) {
-  const collectionSection = document.getElementById('collectionSection');
-  collectionSection.innerHTML = '';
+  const collectionSectionPublic = document.getElementById('collectionSectionPublic');
+  collectionSectionPublic.innerHTML = '';
   let loanCollections = [];
   let customerName = 'Unknown';
 
-  customers.forEach(customer => {
-    customer.loans.forEach(loan => {
+  customers?.forEach(customer => {
+    customer.loans?.forEach(loan => {
       if (loan.id === loanId) {
-        loanCollections = loan.collections;
+        loanCollections = loan.collections || [];
         customerName = customer.name;
       }
     });
@@ -38,13 +38,13 @@ function populateCollections(loanId, customers) {
       <td data-label="Time">${collectionDate.toLocaleTimeString()}</td> 
       <td data-label="Amount">${collection.amount.toFixed(2)}</td>
     `;
-    collectionSection.appendChild(collectionRow);
+    collectionSectionPublic.appendChild(collectionRow);
   });
 }
 
 function getLoanIdByToken(token, customers) {
-  for (const customer of customers) {
-    for (const loan of customer.loans) {
+  for (const customer of customers || []) {
+    for (const loan of customer.loans || []) {
       if (loan.token === token) {
         return loan.id;
       }
