@@ -113,6 +113,9 @@ function populateCustomersList() {
     customerRow.innerHTML = `
       <td data-label="Customer ID">${customer.id}</td>
       <td data-label="Customer Name">${customer.name}</td>
+      <td data-label="Action">
+        ${appState.currentUser?.type === 'admin' ? `<button class="delete-customer-button" onclick="handleDeleteCustomer('${customer.id}')">Delete</button>` : ''}
+      </td>
     `;
     customersList.appendChild(customerRow);
   });
@@ -204,13 +207,32 @@ async function handleCollect(loanId) {
   }
 }
 
+async function handleDeleteCustomer(customerId) {
+  const confirmed = confirm('Are you sure you want to delete this customer and all associated loans and collections?');
+  if (confirmed) {
+    appState.customers = appState.customers.filter((customer) => customer.id !== customerId);
+    appState.loans = appState.loans.filter((loan) => {
+      if (loan.customerId === customerId) {
+        appState.collections = appState.collections.filter((collection) => collection.loanId !== loan.id);
+        return false;
+      }
+      return true;
+    });
+    await saveData();
+    showToast(`Customer ID: ${customerId} and all associated loans and collections deleted successfully!`);
+    populateCustomersList();
+    populateLoansList();
+    populateCollectionSection();
+  }
+}
+
 async function handleDeleteLoan(loanId) {
-  const confirmed = confirm('Are you sure you want to delete this loan?');
+  const confirmed = confirm('Are you sure you want to delete this loan and all associated collections?');
   if (confirmed) {
     appState.loans = appState.loans.filter((loan) => loan.id !== loanId);
     appState.collections = appState.collections.filter((collection) => collection.loanId !== loanId);
     await saveData();
-    showToast(`Loan ID: ${loanId} deleted successfully!`);
+    showToast(`Loan ID: ${loanId} and all associated collections deleted successfully!`);
     populateLoansList();
     populateCollectionSection();
   }
@@ -461,6 +483,7 @@ document.getElementById('addLoanForm').addEventListener('submit', async (event) 
   document.getElementById('addLoanForm').reset();
 });
 
+window.handleDeleteCustomer = handleDeleteCustomer;
 window.handleDeleteLoan = handleDeleteLoan;
 window.filterCollections = filterCollections;
 window.handleDeleteCollection = handleDeleteCollection;

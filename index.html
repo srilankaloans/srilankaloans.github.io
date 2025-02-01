@@ -47,6 +47,7 @@
             <tr>
               <th>Customer ID</th>
               <th>Customer Name</th>
+              <th>Action</th> <!-- Add Action column -->
             </tr>
           </thead>
           <tbody id="customersList">
@@ -54,6 +55,9 @@
             <tr>
               <td data-label="Customer ID">CUST0001</td>
               <td data-label="Customer Name">John Doe</td>
+              <td data-label="Action">
+                <button class="delete-customer-button" onclick="handleDeleteCustomer('CUST0001')">Delete</button>
+              </td>
             </tr>
             <!-- ...existing code... -->
           </tbody>
