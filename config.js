@@ -33,7 +33,13 @@ async function fetchData() {
       headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
     });
     const data = await response.json();
-    appState = isProduction ? JSON.parse(data.files['data.json'].content) : data;
+    const fetchedData = isProduction ? JSON.parse(data.files['data.json'].content) : data;
+    appState.customers = fetchedData.customers;
+    appState.loans = fetchedData.loans;
+    appState.collections = fetchedData.collections;
+    appState.users = fetchedData.users;
+    // Preserve currentUser
+    appState.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     populateCustomerDropdown();
     populateCustomersList();
     populateLoansList();
