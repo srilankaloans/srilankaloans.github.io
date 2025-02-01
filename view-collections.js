@@ -1,17 +1,14 @@
 import { config, getToken } from './config.js';
 
-const isProduction = window.location.hostname !== '127.0.0.1';
-const { gistId } = config;
-const apiUrl = `https://api.github.com/gists/${gistId}`;
-const localDataUrl = 'data.json';
+const apiUrl = `https://api.github.com/gists/${config.gistId}`;
 
 async function fetchData() {
   try {
-    const response = await fetch(isProduction ? apiUrl : localDataUrl, {
-      headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: `token ${getToken()}` },
     });
     const data = await response.json();
-    return isProduction ? JSON.parse(data.files['data.json'].content) : data;
+    return JSON.parse(data.files[config.gistFileName].content);
   } catch (error) {
     console.error('Error fetching data:', error);
     return null;

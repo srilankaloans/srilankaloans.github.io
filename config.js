@@ -1,16 +1,13 @@
 const config = {
-  gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
+  gistId: '2886a159d1e20d6aa2561bea3effe610',
+  gistFileName: 'data.json',
   token: 'g***hp_H9j6LzM*****HhJzrFl*************dbwYfCxugKZ0************uZag0aOGpe', // Tampered token
 };
-
+//7db36bae46a98a48170c6f648b8c9d2e -> testdata.json
+//2886a159d1e20d6aa2561bea3effe610 -> data.json
 const getToken = () => config.token.split('*').join('');
-
 export { config, getToken };
-
-const isProduction = window.location.hostname !== '127.0.0.1';
-const { gistId } = config;
-const apiUrl = `https://api.github.com/gists/${gistId}`;
-const localDataUrl = 'data.json';
+const apiUrl = `https://api.github.com/gists/${config.gistId}`;
 
 let appState = {
   customers: [],
@@ -29,11 +26,11 @@ function showToast(message) {
 
 async function fetchData() {
   try {
-    const response = await fetch(isProduction ? apiUrl : localDataUrl, {
-      headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: `token ${getToken()}` },
     });
     const data = await response.json();
-    const fetchedData = isProduction ? JSON.parse(data.files['data.json'].content) : data;
+    const fetchedData = JSON.parse(data.files[config.gistFileName].content);
     appState.customers = fetchedData.customers;
     appState.loans = fetchedData.loans;
     appState.collections = fetchedData.collections;
@@ -53,25 +50,20 @@ async function fetchData() {
 async function saveData() {
   try {
     const updatedContent = JSON.stringify(appState, null, 2);
-    if (isProduction) {
-      await fetch(apiUrl, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `token ${getToken()}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          files: {
-            'data.json': {
-              content: updatedContent,
-            },
+    await fetch(apiUrl, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `token ${getToken()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        files: {
+          [config.gistFileName]: {
+            content: updatedContent,
           },
-        }),
-      });
-    } else {
-      // For local development, you might need to implement a local server to handle saving data
-      console.log('Data to be saved locally:', updatedContent);
-    }
+        },
+      }),
+    });
     showToast('Data saved successfully!');
   } catch (error) {
     console.error('Error saving data:', error);
@@ -473,11 +465,11 @@ if (loginForm) {
     const password = document.getElementById('password').value;
     const hashedPassword = CryptoJS.SHA256(password).toString();
     try {
-      const response = await fetch(isProduction ? apiUrl : localDataUrl, {
-        headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
+      const response = await fetch(apiUrl, {
+        headers: { Authorization: `token ${getToken()}` },
       });
       const data = await response.json();
-      const users = isProduction ? JSON.parse(data.files['data.json'].content).users : data.users;
+      const users = JSON.parse(data.files[config.gistFileName].content).users;
       const user = users.find((user) => user.username === username && user.password === hashedPassword);
       if (user) {
         appState.currentUser = user;
