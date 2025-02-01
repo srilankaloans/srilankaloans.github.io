@@ -12,8 +12,6 @@ export { config, getToken, apiUrl };
 
 let appState = {
   customers: [],
-  loans: [],
-  collections: [],
   users: [], // Add users to the app state
   currentUser: JSON.parse(localStorage.getItem('currentUser')) || null, // Track the current user
 };
@@ -33,8 +31,6 @@ async function fetchData() {
     const data = await response.json();
     const fetchedData = JSON.parse(data.files[config.gistFileName].content);
     appState.customers = fetchedData.customers;
-    appState.loans = fetchedData.loans;
-    appState.collections = fetchedData.collections;
     appState.users = fetchedData.users;
     // Preserve currentUser
     appState.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
@@ -86,9 +82,15 @@ function autoGenerateCustomerId() {
 }
 
 function autoGenerateLoanId() {
-  const maxId = appState.loans.reduce((max, loan) => {
-    const id = parseInt(loan.id.replace('LOAN', ''), 10);
-    return id > max ? id : max;
+  const maxId = appState.customers.reduce((max, customer) => {
+    if (customer.loans) {
+      const customerMaxId = customer.loans.reduce((loanMax, loan) => {
+        const id = parseInt(loan.id.replace('LOAN', ''), 10);
+        return id > loanMax ? id : loanMax;
+      }, 0);
+      return customerMaxId > max ? customerMaxId : max;
+    }
+    return max;
   }, 0);
   return `LOAN${String(maxId + 1).padStart(4, '0')}`;
 }
@@ -123,60 +125,67 @@ function populateLoansList() {
   const loansList = document.getElementById('loansList');
   loansList.innerHTML = '';
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  appState.loans.forEach((loan) => {
-    const loanRow = document.createElement('tr');
-    loanRow.innerHTML = `
-      <td data-label="Loan ID">${loan.id}</td>
-      <td data-label="Customer ID">${loan.customerId}</td>
-      <td data-label="Loan Amount">${loan.loanAmount}</td>
-      <td data-label="Interest Rate">${loan.interestRate}</td>
-      <td data-label="Duration">${loan.duration}</td>
-      <td data-label="Status">${loan.status}</td>
-      ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button></td>` : ''}
-    `;
-    loansList.appendChild(loanRow);
+  appState.customers.forEach((customer) => {
+    if (customer.loans) {
+      customer.loans.forEach((loan) => {
+        const loanRow = document.createElement('tr');
+        loanRow.innerHTML = `
+          <td data-label="Loan ID">${loan.id}</td>
+          <td data-label="Customer ID">${customer.id}</td>
+          <td data-label="Loan Amount">${loan.loanAmount}</td>
+          <td data-label="Interest Rate">${loan.interestRate}</td>
+          <td data-label="Duration">${loan.duration}</td>
+          <td data-label="Status">${loan.status}</td>
+          ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button></td>` : ''}
+        `;
+        loansList.appendChild(loanRow);
+      });
+    }
   });
 }
 
 function populateCollectionSection() {
   const collectionSection = document.getElementById('collectionSection');
   collectionSection.innerHTML = '';
-  appState.loans.forEach((loan) => {
-    const customer = appState.customers.find((c) => c.id === loan.customerId);
-    const collections = appState.collections.filter((collection) => collection.loanId === loan.id);
-    const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
-    const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
-    const isCollectDisabled = collectedAmount >= totalAmountDue;
-    if (isCollectDisabled) {
-      loan.status = 'completed';
-    }
-    const loanDiv = document.createElement('tr');
-    loanDiv.innerHTML = `
-      <td data-label="Customer Name">${customer ? customer.name : 'Unknown'}</td>
-      <td data-label="Loan ID">${loan.id}</td>
-      <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
-      <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
-      <td data-label="Count">${collections.length}</td>
-      <td data-label="Amount">
-        <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
-      </td>
-      <td data-label="Action" class="action-section">
-        <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
-          <i class="${isCollectDisabled ? 'fas fa-check-circle' : 'fas fa-hand-holding-usd'}"></i>
-        </button>
-        ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
-        <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
-        <button class="generate-qr-button" onclick="generateQRCode('${loan.id}')"><i class="fas fa-qrcode"></i></button>
-      </td>
-    `;
-    collectionSection.appendChild(loanDiv);
+  appState.customers.forEach((customer) => {
+    if (customer.loans) {
+      customer.loans.forEach((loan) => {
+        const collections = loan.collections;
+        const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
+        const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
+        const isCollectDisabled = collectedAmount >= totalAmountDue;
+        if (isCollectDisabled) {
+          loan.status = 'completed';
+        }
+        const loanDiv = document.createElement('tr');
+        loanDiv.innerHTML = `
+          <td data-label="Customer Name">${customer.name}</td>
+          <td data-label="Loan ID">${loan.id}</td>
+          <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
+          <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
+          <td data-label="Count">${collections.length}</td>
+          <td data-label="Amount">
+            <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
+          </td>
+          <td data-label="Action" class="action-section">
+            <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
+              <i class="${isCollectDisabled ? 'fas fa-check-circle' : 'fas fa-hand-holding-usd'}"></i>
+            </button>
+            ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
+            <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
+            <button class="generate-qr-button" onclick="generateQRCode('${loan.id}')"><i class="fas fa-qrcode"></i></button>
+          </td>
+        `;
+        collectionSection.appendChild(loanDiv);
 
-    // Disable collect button if amount is not filled
-    const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
-    const collectButton = loanDiv.querySelector('button');
-    collectAmountInput.addEventListener('input', () => {
-      collectButton.disabled = !collectAmountInput.value || parseFloat(collectAmountInput.value) <= 0;
-    });
+        // Disable collect button if amount is not filled
+        const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
+        const collectButton = loanDiv.querySelector('button');
+        collectAmountInput.addEventListener('input', () => {
+          collectButton.disabled = !collectAmountInput.value || parseFloat(collectAmountInput.value) <= 0;
+        });
+      });
+    }
   });
   hideDeleteButtonsForManagers();
 }
@@ -184,21 +193,27 @@ function populateCollectionSection() {
 async function handleCollect(loanId) {
   const confirmed = confirm('Are you sure you want to collect for this loan?');
   if (confirmed) {
-    const loan = appState.loans.find((l) => l.id === loanId);
+    let loan;
+    appState.customers.forEach(customer => {
+      customer.loans.forEach(l => {
+        if (l.id === loanId) {
+          loan = l;
+        }
+      });
+    });
     const collectAmountInput = document.getElementById(`collectAmount-${loanId}`);
     const collectAmount = parseFloat(collectAmountInput.value);
     if (isNaN(collectAmount) || collectAmount <= 0) {
       showToast('Please enter a valid amount.');
       return;
     }
-    const collections = appState.collections.filter((collection) => collection.loanId === loanId);
-    const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
+    const collectedAmount = loan.collections.reduce((total, collection) => total + collection.amount, 0);
     const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
     if (collectedAmount + collectAmount > totalAmountDue) {
       showToast('Collection amount exceeds the total amount due.');
       return;
     }
-    appState.collections.push({ loanId, date: new Date().toISOString(), amount: collectAmount });
+    loan.collections.push({ date: new Date().toISOString(), amount: collectAmount });
     await saveData();
     showToast(`Collection recorded for Loan ID: ${loanId}`);
     populateCollectionSection(); // Update the collection section
@@ -209,13 +224,6 @@ async function handleDeleteCustomer(customerId) {
   const confirmed = confirm('Are you sure you want to delete this customer and all associated loans and collections?');
   if (confirmed) {
     appState.customers = appState.customers.filter((customer) => customer.id !== customerId);
-    appState.loans = appState.loans.filter((loan) => {
-      if (loan.customerId === customerId) {
-        appState.collections = appState.collections.filter((collection) => collection.loanId !== loan.id);
-        return false;
-      }
-      return true;
-    });
     await saveData();
     showToast(`Customer ID: ${customerId} and all associated loans and collections deleted successfully!`);
     populateCustomersList();
@@ -227,8 +235,9 @@ async function handleDeleteCustomer(customerId) {
 async function handleDeleteLoan(loanId) {
   const confirmed = confirm('Are you sure you want to delete this loan and all associated collections?');
   if (confirmed) {
-    appState.loans = appState.loans.filter((loan) => loan.id !== loanId);
-    appState.collections = appState.collections.filter((collection) => collection.loanId !== loanId);
+    appState.customers.forEach(customer => {
+      customer.loans = customer.loans.filter(loan => loan.id !== loanId);
+    });
     await saveData();
     showToast(`Loan ID: ${loanId} and all associated collections deleted successfully!`);
     populateLoansList();
@@ -239,12 +248,36 @@ async function handleDeleteLoan(loanId) {
 async function handleDeleteCollection(loanId) {
   const confirmed = confirm('Are you sure you want to delete all collections for this loan?');
   if (confirmed) {
-    appState.collections = appState.collections.filter((collection) => collection.loanId !== loanId);
+    appState.customers.forEach(customer => {
+      customer.loans.forEach(loan => {
+        if (loan.id === loanId) {
+          loan.collections = [];
+        }
+      });
+    });
     await saveData();
     showToast(`Collections for Loan ID: ${loanId} deleted successfully!`);
     populateCollectionSection();
   }
 }
+
+// async function handleDeleteCollectionItem(loanId, date) {
+//   const confirmed = confirm('Are you sure you want to delete this collection item?');
+//   if (confirmed) {
+//     appState.customers.forEach(customer => {
+//       customer.loans.forEach(loan => {
+//         if (loan.id === loanId) {
+//           loan.collections = loan.collections.filter(collection => collection.date !== date);
+//         }
+//       });
+//     });
+//     await saveData();
+//     showToast(`Collection item for Loan ID: ${loanId} deleted successfully!`);
+//     showCollectionDetails(loanId); // Refresh the collection details view
+//   }
+// }
+
+// window.handleDeleteCollectionItem = handleDeleteCollectionItem;
 
 function filterCollections() {
   const filterLoanId = document.getElementById('filterLoanId').value.toLowerCase();
@@ -283,7 +316,7 @@ function filterNotCollectedToday() {
     if (loanIdCell) {
       const loanId = loanIdCell.textContent || loanIdCell.innerText;
       const loan = appState.loans.find((l) => l.id === loanId);
-      const collections = appState.collections.filter((collection) => collection.loanId === loanId);
+      const collections = loan.collections;
       const latestCollection = collections.reduce((latest, collection) => {
         const collectionDate = new Date(collection.date);
         return collectionDate > latest ? collectionDate : latest;
@@ -325,7 +358,14 @@ function hideDeleteButtonsForManagers() {
 function showCollectionDetails(loanId) {
   const modal = document.getElementById('collectionDetailsModal');
   const modalContent = document.getElementById('collectionDetailsContent');
-  const collections = appState.collections.filter(collection => collection.loanId === loanId);
+  let collections = [];
+  appState.customers.forEach(customer => {
+    customer.loans.forEach(loan => {
+      if (loan.id === loanId) {
+        collections = loan.collections;
+      }
+    });
+  });
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   modalContent.innerHTML = `
     <h3>Collections for Loan ID: ${loanId}</h3>
@@ -342,7 +382,7 @@ function showCollectionDetails(loanId) {
           <tr>
             <td>${new Date(collection.date).toLocaleDateString()}</td>
             <td>${collection.amount.toFixed(2)}</td>
-            ${currentUser?.type === 'admin' ? `<td><button onclick="handleDeleteCollectionItem('${collection.loanId}', '${collection.date}')"><i class="fas fa-trash-alt"></i></button></td>` : ''}
+            ${currentUser?.type === 'admin' ? `<td><button onclick="handleDeleteCollectionItem('${loanId}', '${collection.date}')"><i class="fas fa-trash-alt"></i></button></td>` : ''}
           </tr>
         `).join('')}
       </tbody>
@@ -355,7 +395,13 @@ function showCollectionDetails(loanId) {
 async function handleDeleteCollectionItem(loanId, date) {
   const confirmed = confirm('Are you sure you want to delete this collection item?');
   if (confirmed) {
-    appState.collections = appState.collections.filter(collection => !(collection.loanId === loanId && collection.date === date));
+    appState.customers.forEach(customer => {
+      customer.loans.forEach(loan => {
+        if (loan.id === loanId) {
+          loan.collections = loan.collections.filter(collection => collection.date !== date);
+        }
+      });
+    });
     await saveData();
     showToast(`Collection item for Loan ID: ${loanId} deleted successfully!`);
     showCollectionDetails(loanId); // Refresh the collection details view
@@ -370,7 +416,14 @@ function closeCollectionDetails() {
 }
 
 function generateQRCode(loanId) {
-  const loan = appState.loans.find(l => l.id === loanId);
+  let loan;
+  appState.customers.forEach(customer => {
+    customer.loans.forEach(l => {
+      if (l.id === loanId) {
+        loan = l;
+      }
+    });
+  });
   const qrCodeModal = document.getElementById('qrCodeModal');
   const qrCodeContent = document.getElementById('qrCodeContent');
   const publicLink = `${window.location.origin}/view-collections.html?token=${loan.token}`;
@@ -431,8 +484,6 @@ if (logoutButton) {
     // Clear app state and show login screen
     appState = {
       customers: [],
-      loans: [],
-      collections: [],
       users: appState.users, // Preserve users
       currentUser: null,
     };
@@ -511,6 +562,7 @@ if (addCustomerForm) {
     const newCustomer = {
       id: autoGenerateCustomerId(),
       name: customerName,
+      loans: [] // Initialize loans array for the new customer
     };
     appState.customers.push(newCustomer);
     await saveData();
@@ -534,19 +586,27 @@ if (addLoanForm) {
     const duration = parseInt(document.getElementById('duration').value, 10);
     const newLoan = {
       id: autoGenerateLoanId(),
-      customerId,
       loanAmount,
       interestRate,
       duration,
       startDate: new Date().toISOString(),
       status: 'active',
+      collections: [], // Initialize collections array for the new loan
       token: generateRandomToken(), // Add token to the new loan
     };
-    appState.loans.push(newLoan);
-    await saveData();
-    showToast(`Loan for Customer ID: ${customerId} added successfully!`);
-    populateLoansList();
-    document.getElementById('addLoanForm').reset();
+    const customer = appState.customers.find(c => c.id === customerId);
+    if (customer) {      
+      if (!customer.loans) {
+        customer.loans = [];
+      }
+      customer.loans.push(newLoan);
+      await saveData();
+      showToast(`Loan for Customer ID: ${customerId} added successfully!`);
+      populateLoansList();
+      document.getElementById('addLoanForm').reset();
+    } else {
+      showToast('Customer not found.');
+    }
   });
 }
 

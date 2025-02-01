@@ -1,6 +1,5 @@
 import { config, getToken, apiUrl } from './config.js';
 
-
 async function fetchData() {
   try {
     const response = await fetch(apiUrl, {
@@ -14,15 +13,23 @@ async function fetchData() {
   }
 }
 
-function populateCollections(loanId, loans, collections, customers) {
+function populateCollections(loanId, customers) {
   const collectionSection = document.getElementById('collectionSection');
   collectionSection.innerHTML = '';
-  const loanCollections = collections.filter((collection) => collection.loanId === loanId);
-  if (loanCollections.length > 0) {
-    const loan = loans.find(l => l.id === loanId);
-    const customer = customers.find((c) => c.id === loan.customerId);
-    document.getElementById('customerName').textContent = customer ? customer.name : 'Unknown';
-  }
+  let loanCollections = [];
+  let customerName = 'Unknown';
+
+  customers.forEach(customer => {
+    customer.loans.forEach(loan => {
+      if (loan.id === loanId) {
+        loanCollections = loan.collections;
+        customerName = customer.name;
+      }
+    });
+  });
+
+  document.getElementById('customerName').textContent = customerName;
+
   loanCollections.forEach((collection) => {
     const collectionRow = document.createElement('tr');
     const collectionDate = new Date(collection.date);
@@ -36,9 +43,15 @@ function populateCollections(loanId, loans, collections, customers) {
   });
 }
 
-function getLoanIdByToken(token, loans) {
-  const loan = loans.find(loan => loan.token === token);
-  return loan ? loan.id : null;
+function getLoanIdByToken(token, customers) {
+  for (const customer of customers) {
+    for (const loan of customer.loans) {
+      if (loan.token === token) {
+        return loan.id;
+      }
+    }
+  }
+  return null;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -46,10 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const token = urlParams.get('token');
   const data = await fetchData();
   if (data) {
-    const loanId = getLoanIdByToken(token, data.loans);
+    const loanId = getLoanIdByToken(token, data.customers);
     if (loanId) {
       document.getElementById('loanId').textContent = loanId;
-      populateCollections(loanId, data.loans, data.collections, data.customers);
+      populateCollections(loanId, data.customers);
     } else {
       alert('You do not have access to view this loan.');
       window.location.href = 'index.html';

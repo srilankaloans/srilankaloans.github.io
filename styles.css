@@ -58,6 +58,8 @@ button:hover {
     border-collapse: collapse;
     overflow-x: auto; /* Add horizontal scroll for small screens */
     display: block; /* Ensure table is block element for responsiveness */
+    max-height: 400px; /* Set a max height for the table */
+    overflow-y: auto; /* Add vertical scroll */
 }
 .responsive-table th, .responsive-table td {
     border: 1px solid #ddd;
@@ -262,6 +264,8 @@ button:hover {
     max-width: 90%;
     width: 400px;
     box-sizing: border-box;
+    max-height: 80vh; /* Set a max height for the modal */
+    overflow-y: auto; /* Add vertical scroll */
 }
 
 .collection-details-modal.show {
@@ -275,6 +279,7 @@ button:hover {
 .collection-details-modal table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 1rem; /* Add space between table and close button */
 }
 
 .collection-details-modal th, .collection-details-modal td {
@@ -329,4 +334,10 @@ button:hover {
 
 .filter-options button.active {
     background-color: #3700b3;
+}
+
+/* Add styles to enable scrolling for all tables and list views */
+#customersList, #loansList, #collectionSection {
+    max-height: 400px; /* Set a max height for the list views */
+    overflow-y: auto; /* Add vertical scroll */
 }
