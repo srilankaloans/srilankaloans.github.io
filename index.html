@@ -47,7 +47,7 @@
             <tr>
               <th>Customer ID</th>
               <th>Customer Name</th>
-              <th>Action</th> <!-- Add Action column -->
+              <th id="customerActionHeader" style="display: none;">Action</th> <!-- Add Action column -->
             </tr>
           </thead>
           <tbody id="customersList">
@@ -55,7 +55,7 @@
             <tr>
               <td data-label="Customer ID">CUST0001</td>
               <td data-label="Customer Name">John Doe</td>
-              <td data-label="Action">
+              <td data-label="Action" style="display: none;">
                 <button class="delete-customer-button" onclick="handleDeleteCustomer('CUST0001')">Delete</button>
               </td>
             </tr>
@@ -83,7 +83,7 @@
               <th>Interest Rate</th>
               <th>Duration</th>
               <th>Status</th>
-              <th>Action</th>
+              <th id="loanActionHeader" style="display: none;">Action</th>
             </tr>
           </thead>
           <tbody id="loansList">
@@ -95,7 +95,7 @@
               <td data-label="Interest Rate">5%</td>
               <td data-label="Duration">30 days</td>
               <td data-label="Status">Active</td>
-              <td data-label="Action" class="action-section">
+              <td data-label="Action" class="action-section" style="display: none;">
                 <button class="delete-loan-button" onclick="handleDeleteLoan('LOAN0001')">Delete</button>
               </td>
             </tr>
@@ -159,5 +159,16 @@
   <div id="collectionDetailsModal" class="collection-details-modal">
     <div id="collectionDetailsContent"></div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser?.type === 'admin') {
+        document.getElementById('customerActionHeader').style.display = '';
+        document.querySelectorAll('#customersList td[data-label="Action"]').forEach(td => td.style.display = '');
+        document.getElementById('loanActionHeader').style.display = '';
+        document.querySelectorAll('#loansList td[data-label="Action"]').forEach(td => td.style.display = '');
+      }
+    });
+  </script>
 </body>
 </html>

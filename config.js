@@ -114,14 +114,13 @@ function populateCustomerDropdown() {
 function populateCustomersList() {
   const customersList = document.getElementById('customersList');
   customersList.innerHTML = '';
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   appState.customers.forEach((customer) => {
     const customerRow = document.createElement('tr');
     customerRow.innerHTML = `
       <td data-label="Customer ID">${customer.id}</td>
       <td data-label="Customer Name">${customer.name}</td>
-      <td data-label="Action">
-        ${appState.currentUser?.type === 'admin' ? `<button class="delete-customer-button" onclick="handleDeleteCustomer('${customer.id}')">Delete</button>` : ''}
-      </td>
+      ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-customer-button" onclick="handleDeleteCustomer('${customer.id}')">Delete</button></td>` : ''}
     `;
     customersList.appendChild(customerRow);
   });
@@ -130,6 +129,7 @@ function populateCustomersList() {
 function populateLoansList() {
   const loansList = document.getElementById('loansList');
   loansList.innerHTML = '';
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   appState.loans.forEach((loan) => {
     const loanRow = document.createElement('tr');
     loanRow.innerHTML = `
@@ -139,9 +139,7 @@ function populateLoansList() {
       <td data-label="Interest Rate">${loan.interestRate}</td>
       <td data-label="Duration">${loan.duration}</td>
       <td data-label="Status">${loan.status}</td>
-      <td data-label="Action">
-        ${appState.currentUser?.type === 'admin' ? `<button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button>` : ''}
-      </td>
+      ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button></td>` : ''}
     `;
     loansList.appendChild(loanRow);
   });
