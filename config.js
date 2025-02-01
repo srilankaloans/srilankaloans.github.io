@@ -1,4 +1,4 @@
-import sha256 from 'https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/sha256.js';
+import * as CryptoJS from 'https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js';
 
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
@@ -395,7 +395,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   // Perform login validation here
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
-  const hashedPassword = sha256(password).toString();
+  const hashedPassword = CryptoJS.SHA256(password).toString();
   try {
     const response = await fetch(isProduction ? apiUrl : localDataUrl, {
       headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
