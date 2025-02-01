@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Collections</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script type="module" src="view-collections.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Loan Collections</h1>
+    </header>
+    <main>
+      <div id="collectionsPage">
+        <h2>Collections for Loan ID: <span id="loanId"></span></h2>
+        <h3>Customer Name: <span id="customerName"></span></h3>
+        <table class="responsive-table" id="collectionTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th> <!-- Add Time column header -->
+              <th>Amount</th>
+              <!-- Remove QR code column header -->
+            </tr>
+          </thead>
+          <tbody id="collectionSection">
+            <!-- Collections will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

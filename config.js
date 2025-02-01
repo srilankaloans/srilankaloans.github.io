@@ -173,6 +173,7 @@ function populateCollectionSection() {
         </button>
         ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
         <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
+        <button class="generate-qr-button" onclick="generateQRCode('${loan.id}')"><i class="fas fa-qrcode"></i></button>
       </td>
     `;
     collectionSection.appendChild(loanDiv);
@@ -375,50 +376,83 @@ function closeCollectionDetails() {
   modal.classList.remove('show');
 }
 
-document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+function generateQRCode(loanId) {
+  const loan = appState.loans.find(l => l.id === loanId);
+  const qrCodeModal = document.getElementById('qrCodeModal');
+  const qrCodeContent = document.getElementById('qrCodeContent');
+  const publicLink = `${window.location.origin}/view-collections.html?token=${loan.token}`;
+  qrCodeContent.innerHTML = `<h3>QR Code for Loan ID: ${loanId}</h3><canvas id="qrCodeDisplay"></canvas><p><a href="${publicLink}" target="_blank">${publicLink}</a></p>`;
+  QRCode.toCanvas(document.getElementById('qrCodeDisplay'), publicLink, function (error) {
+    if (error) console.error(error);
+  });
+  qrCodeModal.classList.add('show');
+}
 
-document.getElementById('customersPageButton').addEventListener('click', async () => {
-  await fetchData();
-  document.getElementById('customersPage').style.display = 'block';
-  document.getElementById('loansPage').style.display = 'none';
-  document.getElementById('collectionsPage').style.display = 'none';
-  hideMenu();
-});
+function closeQRCodeModal() {
+  const qrCodeModal = document.getElementById('qrCodeModal');
+  qrCodeModal.classList.remove('show');
+}
 
-document.getElementById('loansPageButton').addEventListener('click', async () => {
-  await fetchData();
-  document.getElementById('customersPage').style.display = 'none';
-  document.getElementById('loansPage').style.display = 'block';
-  document.getElementById('collectionsPage').style.display = 'none';
-  hideMenu();
-});
+// Add checks to ensure the elements exist before adding event listeners
+const menuToggle = document.getElementById('menuToggle');
+if (menuToggle) {
+  menuToggle.addEventListener('click', toggleMenu);
+}
 
-document.getElementById('collectionsPageButton').addEventListener('click', async () => {
-  await fetchData();
-  document.getElementById('customersPage').style.display = 'none';
-  document.getElementById('loansPage').style.display = 'none';
-  document.getElementById('collectionsPage').style.display = 'block';
-  hideMenu();
-});
+const customersPageButton = document.getElementById('customersPageButton');
+if (customersPageButton) {
+  customersPageButton.addEventListener('click', async () => {
+    await fetchData();
+    document.getElementById('customersPage').style.display = 'block';
+    document.getElementById('loansPage').style.display = 'none';
+    document.getElementById('collectionsPage').style.display = 'none';
+    hideMenu();
+  });
+}
 
-document.getElementById('logoutButton').addEventListener('click', () => {
-  // Clear app state and show login screen
-  appState = {
-    customers: [],
-    loans: [],
-    collections: [],
-    users: appState.users, // Preserve users
-    currentUser: null,
-  };
-  localStorage.removeItem('currentUser'); // Clear currentUser from localStorage
-  showToast('You have been logged out.');
-  document.getElementById('mainNav').style.display = 'none';
-  document.getElementById('menuToggle').style.display = 'none';
-  document.getElementById('customersPage').style.display = 'none';
-  document.getElementById('loansPage').style.display = 'none';
-  document.getElementById('collectionsPage').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'block';
-});
+const loansPageButton = document.getElementById('loansPageButton');
+if (loansPageButton) {
+  loansPageButton.addEventListener('click', async () => {
+    await fetchData();
+    document.getElementById('customersPage').style.display = 'none';
+    document.getElementById('loansPage').style.display = 'block';
+    document.getElementById('collectionsPage').style.display = 'none';
+    hideMenu();
+  });
+}
+
+const collectionsPageButton = document.getElementById('collectionsPageButton');
+if (collectionsPageButton) {
+  collectionsPageButton.addEventListener('click', async () => {
+    await fetchData();
+    document.getElementById('customersPage').style.display = 'none';
+    document.getElementById('loansPage').style.display = 'none';
+    document.getElementById('collectionsPage').style.display = 'block';
+    hideMenu();
+  });
+}
+
+const logoutButton = document.getElementById('logoutButton');
+if (logoutButton) {
+  logoutButton.addEventListener('click', () => {
+    // Clear app state and show login screen
+    appState = {
+      customers: [],
+      loans: [],
+      collections: [],
+      users: appState.users, // Preserve users
+      currentUser: null,
+    };
+    localStorage.removeItem('currentUser'); // Clear currentUser from localStorage
+    showToast('You have been logged out.');
+    document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('menuToggle').style.display = 'none';
+    document.getElementById('customersPage').style.display = 'none';
+    document.getElementById('loansPage').style.display = 'none';
+    document.getElementById('collectionsPage').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'block';
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initially show login screen
@@ -430,79 +464,96 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginScreen').style.display = 'block';
 });
 
-document.getElementById('loginForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  // Perform login validation here
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const hashedPassword = CryptoJS.SHA256(password).toString();
-  try {
-    const response = await fetch(isProduction ? apiUrl : localDataUrl, {
-      headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
-    });
-    const data = await response.json();
-    const users = isProduction ? JSON.parse(data.files['data.json'].content).users : data.users;
-    const user = users.find((user) => user.username === username && user.password === hashedPassword);
-    if (user) {
-      appState.currentUser = user;
-      localStorage.setItem('currentUser', JSON.stringify(user)); // Store currentUser in localStorage
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
-      document.getElementById('menuToggle').style.display = 'block';
-      if (user.type === 'admin') {
-        document.getElementById('adminDashboard').style.display = 'block';
-      } else if (user.type === 'manager') {
-        document.getElementById('customersPage').style.display = 'block';
-        document.getElementById('loansPage').style.display = 'none';
-        document.getElementById('collectionsPage').style.display = 'none';
-        fetchData();
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    // Perform login validation here
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const hashedPassword = CryptoJS.SHA256(password).toString();
+    try {
+      const response = await fetch(isProduction ? apiUrl : localDataUrl, {
+        headers: isProduction ? { Authorization: `token ${getToken()}` } : {},
+      });
+      const data = await response.json();
+      const users = isProduction ? JSON.parse(data.files['data.json'].content).users : data.users;
+      const user = users.find((user) => user.username === username && user.password === hashedPassword);
+      if (user) {
+        appState.currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user)); // Store currentUser in localStorage
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainNav').style.display = 'none'; // Ensure menu is collapsed initially
+        document.getElementById('menuToggle').style.display = 'block';
+        if (user.type === 'admin') {
+          document.getElementById('adminDashboard').style.display = 'block';
+        } else if (user.type === 'manager') {
+          document.getElementById('customersPage').style.display = 'block';
+          document.getElementById('loansPage').style.display = 'none';
+          document.getElementById('collectionsPage').style.display = 'none';
+          fetchData();
+        }
+      } else {
+        showToast('Invalid credentials!');
       }
-    } else {
-      showToast('Invalid credentials!');
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      showToast('Error during login. Please try again.');
     }
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    showToast('Error during login. Please try again.');
-  }
-});
+  });
+}
 
-document.getElementById('refreshButton').addEventListener('click', refreshData);
+const refreshButton = document.getElementById('refreshButton');
+if (refreshButton) {
+  refreshButton.addEventListener('click', refreshData);
+}
 
-document.getElementById('addCustomerForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const customerName = document.getElementById('customerName').value;
-  const newCustomer = {
-    id: autoGenerateCustomerId(),
-    name: customerName,
-  };
-  appState.customers.push(newCustomer);
-  await saveData();
-  showToast(`Customer ${customerName} added successfully!`);
-  populateCustomersList();
-  document.getElementById('addCustomerForm').reset();
-});
+const addCustomerForm = document.getElementById('addCustomerForm');
+if (addCustomerForm) {
+  addCustomerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const customerName = document.getElementById('customerName').value;
+    const newCustomer = {
+      id: autoGenerateCustomerId(),
+      name: customerName,
+    };
+    appState.customers.push(newCustomer);
+    await saveData();
+    showToast(`Customer ${customerName} added successfully!`);
+    populateCustomersList();
+    document.getElementById('addCustomerForm').reset();
+  });
+}
 
-document.getElementById('addLoanForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const customerId = document.getElementById('customerDropdown').value;
-  const loanAmount = parseFloat(document.getElementById('loanAmount').value);
-  const interestRate = parseFloat(document.getElementById('interestRate').value);
-  const duration = parseInt(document.getElementById('duration').value, 10);
-  const newLoan = {
-    id: autoGenerateLoanId(),
-    customerId,
-    loanAmount,
-    interestRate,
-    duration,
-    startDate: new Date().toISOString(),
-    status: 'active',
-  };
-  appState.loans.push(newLoan);
-  await saveData();
-  showToast(`Loan for Customer ID: ${customerId} added successfully!`);
-  populateLoansList();
-  document.getElementById('addLoanForm').reset();
-});
+function generateRandomToken() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
+const addLoanForm = document.getElementById('addLoanForm');
+if (addLoanForm) {
+  addLoanForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const customerId = document.getElementById('customerDropdown').value;
+    const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+    const interestRate = parseFloat(document.getElementById('interestRate').value);
+    const duration = parseInt(document.getElementById('duration').value, 10);
+    const newLoan = {
+      id: autoGenerateLoanId(),
+      customerId,
+      loanAmount,
+      interestRate,
+      duration,
+      startDate: new Date().toISOString(),
+      status: 'active',
+      token: generateRandomToken(), // Add token to the new loan
+    };
+    appState.loans.push(newLoan);
+    await saveData();
+    showToast(`Loan for Customer ID: ${customerId} added successfully!`);
+    populateLoansList();
+    document.getElementById('addLoanForm').reset();
+  });
+}
 
 window.handleDeleteCustomer = handleDeleteCustomer;
 window.handleDeleteLoan = handleDeleteLoan;
@@ -515,3 +566,23 @@ window.closeCollectionDetails = closeCollectionDetails;
 window.filterNotCompleted = filterNotCompleted;
 window.filterNotCollectedToday = filterNotCollectedToday;
 window.clearFilters = clearFilters;
+window.generateQRCode = generateQRCode;
+window.closeQRCodeModal = closeQRCodeModal;
+
+// ...existing code...
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (currentUser?.type === 'admin') {
+    const customerActionHeader = document.getElementById('customerActionHeader');
+    if (customerActionHeader) {
+      customerActionHeader.style.display = '';
+    }
+    document.querySelectorAll('#customersList td[data-label="Action"]').forEach(td => td.style.display = '');
+    const loanActionHeader = document.getElementById('loanActionHeader');
+    if (loanActionHeader) {
+      loanActionHeader.style.display = '';
+    }
+    document.querySelectorAll('#loansList td[data-label="Action"]').forEach(td => td.style.display = '');
+  }
+});
+// ...existing code...

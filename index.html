@@ -147,6 +147,9 @@
                 <button onclick="showCollectionDetails('LOAN0001')">
                   <i class="fas fa-info-circle"></i>
                 </button>
+                <button onclick="generateQRCode('LOAN0001')">
+                  <i class="fas fa-qrcode"></i>
+                </button>
               </td>
             </tr>
             <!-- ...existing code... -->
@@ -159,16 +162,10 @@
   <div id="collectionDetailsModal" class="collection-details-modal">
     <div id="collectionDetailsContent"></div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      if (currentUser?.type === 'admin') {
-        document.getElementById('customerActionHeader').style.display = '';
-        document.querySelectorAll('#customersList td[data-label="Action"]').forEach(td => td.style.display = '');
-        document.getElementById('loanActionHeader').style.display = '';
-        document.querySelectorAll('#loansList td[data-label="Action"]').forEach(td => td.style.display = '');
-      }
-    });
-  </script>
+  <div id="qrCodeModal" class="collection-details-modal">
+    <div id="qrCodeContent"></div>
+    <button class="close-button" onclick="closeQRCodeModal()">Close</button>
+  </div>
+  <script type="module" src="config.js"></script>
 </body>
 </html>
