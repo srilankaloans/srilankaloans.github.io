@@ -85,13 +85,8 @@ button:hover {
     .responsive-table thead, .responsive-table tbody, .responsive-table th, .responsive-table td, .responsive-table tr {
         display: block;
     }
-    .responsive-table thead tr {
-        position: relative; /* Change from absolute to relative */
-        top: 0; /* Reset top position */
-        left: 0; /* Reset left position */
-        background-color: #f2f2f2; /* Add background color for visibility */
-        display: flex; /* Use flexbox for layout */
-        justify-content: space-between; /* Distribute space between headers */
+    .responsive-table thead {
+        display: none; /* Hide thead for mobile view */
     }
     .responsive-table tr {
         border: 1px solid #ccc;

@@ -34,10 +34,9 @@ function populateCollections(loanId, customers) {
     const collectionRow = document.createElement('tr');
     const collectionDate = new Date(collection.date);
     collectionRow.innerHTML = `
-      <td>${collectionDate.toLocaleDateString()}</td>
-      <td>${collectionDate.toLocaleTimeString()}</td> <!-- Add Time column data -->
-      <td>${collection.amount.toFixed(2)}</td>
-      <!-- Remove QR code column data -->
+      <td data-label="Date">${collectionDate.toLocaleDateString()}</td>
+      <td data-label="Time">${collectionDate.toLocaleTimeString()}</td> 
+      <td data-label="Amount">${collection.amount.toFixed(2)}</td>
     `;
     collectionSection.appendChild(collectionRow);
   });
@@ -67,5 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('You do not have access to view this loan.');
       window.location.href = 'index.html';
     }
+  } else {
+    alert('Error fetching data. Please try again.');
   }
 });

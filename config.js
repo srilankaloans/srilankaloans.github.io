@@ -500,12 +500,12 @@ if (logoutButton) {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initially show login screen
-  document.getElementById('mainNav').style.display = 'none';
-  document.getElementById('menuToggle').style.display = 'none';
-  document.getElementById('customersPage').style.display = 'none';
+  if (document.getElementById('mainNav')) document.getElementById('mainNav').style.display = 'none';
+  if (document.getElementById('menuToggle')) document.getElementById('menuToggle').style.display = 'none';
+  if (document.getElementById('customersPage')) document.getElementById('customersPage').style.display = 'none';
   document.getElementById('loansPage').style.display = 'none';
-  document.getElementById('collectionsPage').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'block';
+  if (document.getElementById('collectionsPage')) document.getElementById('collectionsPage').style.display = 'none';
+  if (document.getElementById('loginScreen')) document.getElementById('loginScreen').style.display = 'block';
 });
 
 const loginForm = document.getElementById('loginForm');
