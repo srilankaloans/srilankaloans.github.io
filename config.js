@@ -1,4 +1,4 @@
-import { sha256 } from 'crypto-js';
+import sha256 from 'https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/sha256.js';
 
 const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610', // Replace with your Gist ID
