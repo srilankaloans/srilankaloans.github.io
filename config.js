@@ -2,19 +2,23 @@ const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610',
   gistFileName: 'data.json',
   token: 'g***hp_H9j6LzM*****HhJzrFl*************dbwYfCxugKZ0************uZag0aOGpe', // Tampered token
-  commitVersion: '1.0.1' // Increment this value for each commit
+  commitVersion: '1.0.2' // Increment this value for each commit
 };
+
 //7db36bae46a98a48170c6f648b8c9d2e -> testdata.json
 //2886a159d1e20d6aa2561bea3effe610 -> data.json
+
 const getToken = () => config.token.split('*').join('');
 const apiUrl = `https://api.github.com/gists/${config.gistId}`;
 export { config, getToken, apiUrl };
 
 let appState = {
   customers: [],
-  users: [], // Add users to the app state
-  currentUser: JSON.parse(localStorage.getItem('currentUser')) || null, // Track the current user
+  users: [],
+  currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
 };
+
+export { appState };
 
 function showToast(message) {
   const toaster = document.getElementById('toaster');
@@ -32,7 +36,6 @@ async function fetchData() {
     const fetchedData = JSON.parse(data.files[config.gistFileName].content);
     appState.customers = fetchedData.customers;
     appState.users = fetchedData.users;
-    // Preserve currentUser
     appState.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     populateCustomerDropdown();
     populateCustomersList();
@@ -153,6 +156,7 @@ function populateCollectionSection() {
         const collections = loan.collections;
         const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
         const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
+        const remainingAmountDue = totalAmountDue - collectedAmount;
         const isCollectDisabled = collectedAmount >= totalAmountDue;
         if (isCollectDisabled) {
           loan.status = 'completed';
@@ -163,6 +167,7 @@ function populateCollectionSection() {
           <td data-label="Loan ID">${loan.id}</td>
           <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
           <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
+          <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td> <!-- Add Amount Due column data -->
           <td data-label="Count">${collections.length}</td>
           <td data-label="Amount">
             <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
@@ -178,7 +183,6 @@ function populateCollectionSection() {
         `;
         collectionSection.appendChild(loanDiv);
 
-        // Disable collect button if amount is not filled
         const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
         const collectButton = loanDiv.querySelector('button');
         collectAmountInput.addEventListener('input', () => {
@@ -189,6 +193,7 @@ function populateCollectionSection() {
   });
   hideDeleteButtonsForManagers();
 }
+
 
 async function handleCollect(loanId) {
   const confirmed = confirm('Are you sure you want to collect for this loan?');
@@ -216,7 +221,7 @@ async function handleCollect(loanId) {
     loan.collections.push({ date: new Date().toISOString(), amount: collectAmount });
     await saveData();
     showToast(`Collection recorded for Loan ID: ${loanId}`);
-    populateCollectionSection(); // Update the collection section
+    populateCollectionSection();
   }
 }
 
@@ -260,24 +265,6 @@ async function handleDeleteCollection(loanId) {
     populateCollectionSection();
   }
 }
-
-// async function handleDeleteCollectionItem(loanId, date) {
-//   const confirmed = confirm('Are you sure you want to delete this collection item?');
-//   if (confirmed) {
-//     appState.customers.forEach(customer => {
-//       customer.loans.forEach(loan => {
-//         if (loan.id === loanId) {
-//           loan.collections = loan.collections.filter(collection => collection.date !== date);
-//         }
-//       });
-//     });
-//     await saveData();
-//     showToast(`Collection item for Loan ID: ${loanId} deleted successfully!`);
-//     showCollectionDetails(loanId); // Refresh the collection details view
-//   }
-// }
-
-// window.handleDeleteCollectionItem = handleDeleteCollectionItem;
 
 function filterCollections() {
   const filterLoanId = document.getElementById('filterLoanId').value.toLowerCase();
@@ -403,7 +390,7 @@ async function handleDeleteCollectionItem(loanId, date) {
     });
     await saveData();
     showToast(`Collection item for Loan ID: ${loanId} deleted successfully!`);
-    showCollectionDetails(loanId); // Refresh the collection details view
+    showCollectionDetails(loanId);
   }
 }
 
@@ -438,7 +425,6 @@ function closeQRCodeModal() {
   qrCodeModal.classList.remove('show');
 }
 
-// Add checks to ensure the elements exist before adding event listeners
 const menuToggle = document.getElementById('menuToggle');
 if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
 
@@ -487,13 +473,12 @@ if (collectionsPageButton) {
 const logoutButton = document.getElementById('logoutButton');
 if (logoutButton) {
   logoutButton.addEventListener('click', () => {
-    // Clear app state and show login screen
     appState = {
       customers: [],
-      users: appState.users, // Preserve users
+      users: appState.users,
       currentUser: null,
     };
-    localStorage.removeItem('currentUser'); // Clear currentUser from localStorage
+    localStorage.removeItem('currentUser');
     showToast('You have been logged out.');
     const mainNav = document.getElementById('mainNav');
     const menuToggle = document.getElementById('menuToggle');
@@ -511,7 +496,6 @@ if (logoutButton) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initially show login screen
   const mainNav = document.getElementById('mainNav');
   const menuToggle = document.getElementById('menuToggle');
   const customersPage = document.getElementById('customersPage');
@@ -530,7 +514,6 @@ const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    // Perform login validation here
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const hashedPassword = CryptoJS.SHA256(password).toString();
@@ -543,7 +526,7 @@ if (loginForm) {
       const user = users.find((user) => user.username === username && user.password === hashedPassword);
       if (user) {
         appState.currentUser = user;
-        localStorage.setItem('currentUser', JSON.stringify(user)); // Store currentUser in localStorage
+        localStorage.setItem('currentUser', JSON.stringify(user));
         const loginScreen = document.getElementById('loginScreen');
         const mainNav = document.getElementById('mainNav');
         const menuToggle = document.getElementById('menuToggle');
@@ -552,7 +535,7 @@ if (loginForm) {
         const loansPage = document.getElementById('loansPage');
         const collectionsPage = document.getElementById('collectionsPage');
         if (loginScreen) loginScreen.style.display = 'none';
-        if (mainNav) mainNav.style.display = 'none'; // Ensure menu is collapsed initially
+        if (mainNav) mainNav.style.display = 'none';
         if (menuToggle) menuToggle.style.display = 'block';
         if (user.type === 'admin') {
           if (adminDashboard) adminDashboard.style.display = 'block';
@@ -584,7 +567,7 @@ if (addCustomerForm) {
     const newCustomer = {
       id: autoGenerateCustomerId(),
       name: customerName,
-      loans: [] // Initialize loans array for the new customer
+      loans: []
     };
     appState.customers.push(newCustomer);
     await saveData();
@@ -613,8 +596,8 @@ if (addLoanForm) {
       duration,
       startDate: new Date().toISOString(),
       status: 'active',
-      collections: [], // Initialize collections array for the new loan
-      token: generateRandomToken(), // Add token to the new loan
+      collections: [],
+      token: generateRandomToken(),
     };
     const customer = appState.customers.find(c => c.id === customerId);
     if (customer) {      
@@ -646,7 +629,6 @@ window.clearFilters = clearFilters;
 window.generateQRCode = generateQRCode;
 window.closeQRCodeModal = closeQRCodeModal;
 
-// ...existing code...
 document.addEventListener('DOMContentLoaded', () => {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (currentUser?.type === 'admin') {
@@ -658,4 +640,54 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#loansList td[data-label="Action"]').forEach(td => td.style.display = '');
   }
 });
-// ...existing code...
+
+function sortTable(tableId, columnIndex, ascending) {
+  const table = document.getElementById(tableId);
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  rows.sort((a, b) => {
+    const aText = a.children[columnIndex].textContent.trim();
+    const bText = b.children[columnIndex].textContent.trim();
+    const aValue = isNaN(aText) ? aText : parseFloat(aText.replace(/[^0-9.-]+/g, ""));
+    const bValue = isNaN(bText) ? bText : parseFloat(bText.replace(/[^0-9.-]+/g, ""));
+    return ascending ? aValue - bValue : bValue - aValue;
+  });
+  rows.forEach(row => table.querySelector('tbody').appendChild(row));
+}
+
+function setupTableSorting(tableId) {
+  const table = document.getElementById(tableId);
+  const headers = table.querySelectorAll('th');
+  headers.forEach((header, index) => {
+    header.classList.add('sortable');
+    header.addEventListener('click', () => {
+      const ascending = !header.classList.contains('ascending');
+      headers.forEach(h => h.classList.remove('ascending', 'descending'));
+      header.classList.add(ascending ? 'ascending' : 'descending');
+      sortTable(tableId, index, ascending);
+    });
+  });
+}
+
+function setupPagination(tableId, rowsPerPage) {
+  const table = document.getElementById(tableId);
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const totalPages = Math.ceil(rows.length / rowsPerPage);
+  const paginationContainer = document.createElement('div');
+  paginationContainer.className = 'pagination';
+  for (let i = 1; i <= totalPages; i++) {
+    const pageButton = document.createElement('button');
+    pageButton.textContent = i;
+    pageButton.addEventListener('click', () => {
+      rows.forEach((row, index) => {
+        row.style.display = (index >= (i - 1) * rowsPerPage && index < i * rowsPerPage) ? '' : 'none';
+      });
+    });
+    paginationContainer.appendChild(pageButton);
+  }
+  table.parentElement.appendChild(paginationContainer);
+  rows.forEach((row, index) => {
+    row.style.display = index < rowsPerPage ? '' : 'none';
+  });
+}
+
+export { setupTableSorting, setupPagination };

@@ -1,4 +1,4 @@
-import { config, getToken, apiUrl } from './config.js';
+import { config, getToken, apiUrl, setupTableSorting, setupPagination } from './config.js';
 
 async function fetchData() {
   try {
@@ -18,17 +18,25 @@ function populateCollections(loanId, customers) {
   collectionSectionPublic.innerHTML = '';
   let loanCollections = [];
   let customerName = 'Unknown';
+  let loanAmount = 0;
+  let interestRate = 0;
 
   customers?.forEach(customer => {
     customer.loans?.forEach(loan => {
       if (loan.id === loanId) {
         loanCollections = loan.collections || [];
         customerName = customer.name;
+        loanAmount = loan.loanAmount;
+        interestRate = loan.interestRate;
       }
     });
   });
 
   document.getElementById('customerName').textContent = customerName;
+
+  const totalAmountDue = loanAmount + (loanAmount * interestRate / 100);
+  const collectedAmount = loanCollections.reduce((total, collection) => total + collection.amount, 0);
+  const remainingAmountDue = totalAmountDue - collectedAmount;
 
   loanCollections.forEach((collection) => {
     const collectionRow = document.createElement('tr');
@@ -37,9 +45,13 @@ function populateCollections(loanId, customers) {
       <td data-label="Date">${collectionDate.toLocaleDateString()}</td>
       <td data-label="Time">${collectionDate.toLocaleTimeString()}</td> 
       <td data-label="Amount">${collection.amount.toFixed(2)}</td>
+      <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td>
     `;
     collectionSectionPublic.appendChild(collectionRow);
   });
+
+  setupTableSorting('collectionTable');
+  setupPagination('collectionTable', 10);
 }
 
 function getLoanIdByToken(token, customers) {
@@ -56,9 +68,12 @@ function getLoanIdByToken(token, customers) {
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
+  console.log('Token:', token); // Debugging line
   const data = await fetchData();
   if (data) {
+    console.log('Fetched Data:', data); // Debugging line
     const loanId = getLoanIdByToken(token, data.customers);
+    console.log('Loan ID:', loanId); // Debugging line
     if (loanId) {
       document.getElementById('loanId').textContent = loanId;
       populateCollections(loanId, data.customers);
