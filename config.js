@@ -2,7 +2,7 @@ const config = {
   gistId: '2886a159d1e20d6aa2561bea3effe610',
   gistFileName: 'data.json',
   token: 'g***hp_H9j6LzM*****HhJzrFl*************dbwYfCxugKZ0************uZag0aOGpe', // Tampered token
-  commitVersion: '1.0.2' // Increment this value for each commit
+  commitVersion: '1.0.3' // Increment this value for each commit
 };
 
 //7db36bae46a98a48170c6f648b8c9d2e -> testdata.json
@@ -10,7 +10,6 @@ const config = {
 
 const getToken = () => config.token.split('*').join('');
 const apiUrl = `https://api.github.com/gists/${config.gistId}`;
-export { config, getToken, apiUrl };
 
 let appState = {
   customers: [],
@@ -18,7 +17,7 @@ let appState = {
   currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
 };
 
-export { appState };
+export { appState, config, getToken, apiUrl };
 
 function showToast(message) {
   const toaster = document.getElementById('toaster');
