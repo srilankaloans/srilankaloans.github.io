@@ -20,6 +20,7 @@ function populateCollections(loanId, customers) {
   let customerName = 'Unknown';
   let loanAmount = 0;
   let interestRate = 0;
+  let duration = 0;
 
   customers?.forEach(customer => {
     customer.loans?.forEach(loan => {
@@ -28,24 +29,26 @@ function populateCollections(loanId, customers) {
         customerName = customer.name;
         loanAmount = loan.loanAmount;
         interestRate = loan.interestRate;
+        duration = loan.duration / 30; // Convert duration to months
       }
     });
   });
 
   document.getElementById('customerName').textContent = customerName;
 
-  const totalAmountDue = loanAmount + (loanAmount * interestRate / 100);
-  const collectedAmount = loanCollections.reduce((total, collection) => total + collection.amount, 0);
-  const remainingAmountDue = totalAmountDue - collectedAmount;
+  const totalAmountDue = loanAmount + calculateCompoundInterest(loanAmount, interestRate, duration);
+  let collectedAmount = 0;
 
   loanCollections.forEach((collection) => {
     const collectionRow = document.createElement('tr');
+    collectedAmount += collection.amount;
+    const remainingAmountDue = totalAmountDue - collectedAmount;
     const collectionDate = new Date(collection.date);
     collectionRow.innerHTML = `
       <td data-label="Date">${collectionDate.toLocaleDateString()}</td>
-      <td data-label="Time">${collectionDate.toLocaleTimeString()}</td> 
-      <td data-label="Amount">${collection.amount.toFixed(2)}</td>
+      <td data-label="Time">${collectionDate.toLocaleTimeString()}</td>
       <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td>
+      <td data-label="Amount">${collection.amount.toFixed(2)}</td>
     `;
     collectionSectionPublic.appendChild(collectionRow);
   });

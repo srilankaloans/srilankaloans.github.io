@@ -130,6 +130,7 @@ function populateLoansList() {
   appState.customers.forEach((customer) => {
     if (customer.loans) {
       customer.loans.forEach((loan) => {
+        const dailyMinimumAmount = calculateDailyMinimumAmount(loan.id); // Calculate daily minimum amount
         const loanRow = document.createElement('tr');
         loanRow.innerHTML = `
           <td data-label="Loan ID">${loan.id}</td>
@@ -137,7 +138,8 @@ function populateLoansList() {
           <td data-label="Loan Amount">${loan.loanAmount}</td>
           <td data-label="Interest Rate">${loan.interestRate}</td>
           <td data-label="Duration">${loan.duration}</td>
-          <td data-label="Status">${loan.status}</td>
+          <td data-label="Daily Minimum Amount">${dailyMinimumAmount.toFixed(2)}</td> <!-- Add Daily Minimum Amount data -->
+          <td data-label="Status">${loan.status}</td> <!-- Move Status column to last -->
           ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button></td>` : ''}
         `;
         loansList.appendChild(loanRow);
@@ -150,45 +152,46 @@ function populateCollectionSection() {
   const collectionSection = document.getElementById('collectionSection');
   collectionSection.innerHTML = '';
   appState.customers.forEach((customer) => {
-    if (customer.loans) {
-      customer.loans.forEach((loan) => {
-        const collections = loan.collections;
-        const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
-        const totalAmountDue = loan.loanAmount + (loan.loanAmount * loan.interestRate / 100);
-        const remainingAmountDue = totalAmountDue - collectedAmount;
-        const isCollectDisabled = collectedAmount >= totalAmountDue;
-        if (isCollectDisabled) {
-          loan.status = 'completed';
-        }
-        const loanDiv = document.createElement('tr');
-        loanDiv.innerHTML = `
-          <td data-label="Customer Name">${customer.name}</td>
-          <td data-label="Loan ID">${loan.id}</td>
-          <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
-          <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
-          <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td> <!-- Add Amount Due column data -->
-          <td data-label="Count">${collections.length}</td>
-          <td data-label="Amount">
-            <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
-          </td>
-          <td data-label="Action" class="action-section">
-            <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
-              <i class="${isCollectDisabled ? 'fas fa-check-circle' : 'fas fa-hand-holding-usd'}"></i>
-            </button>
-            ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
-            <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
-            <button class="generate-qr-button" onclick="generateQRCode('${loan.id}')"><i class="fas fa-qrcode"></i></button>
-          </td>
-        `;
-        collectionSection.appendChild(loanDiv);
+      if (customer.loans) {
+          customer.loans.forEach((loan) => {
+              const collections = loan.collections;
+              const collectedAmount = collections.reduce((total, collection) => total + collection.amount, 0);
+              const duration = loan.duration / 30; // Convert duration to months
+              const totalAmountDue = loan.loanAmount + calculateCompoundInterest(loan.loanAmount, loan.interestRate, duration);
+              const remainingAmountDue = totalAmountDue - collectedAmount;
+              const isCollectDisabled = collectedAmount >= totalAmountDue;
+              if (isCollectDisabled) {
+                  loan.status = 'completed';
+              }
+              const loanDiv = document.createElement('tr');
+              loanDiv.innerHTML = `
+        <td data-label="Customer Name">${customer.name}</td>
+        <td data-label="Loan ID">${loan.id}</td>
+        <td data-label="Start Date">${new Date(loan.startDate).toLocaleDateString()}</td>
+        <td data-label="Collected Amount">${collectedAmount.toFixed(2)}</td>
+        <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td> <!-- Add Amount Due column data -->
+        <td data-label="Count">${collections.length}</td>
+        <td data-label="Amount">
+          <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
+        </td>
+        <td data-label="Action" class="action-section">
+          <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
+            <i class="${isCollectDisabled ? 'fas fa-check-circle' : 'fas fa-hand-holding-usd'}"></i>
+          </button>
+          ${appState.currentUser?.type === 'admin' ? `<button class="delete-collection-button" onclick="handleDeleteCollection('${loan.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
+          <button class="view-collection-button" onclick="showCollectionDetails('${loan.id}')"><i class="fas fa-info-circle"></i></button>
+          <button class="generate-qr-button" onclick="generateQRCode('${loan.id}')"><i class="fas fa-qrcode"></i></button>
+        </td>
+      `;
+              collectionSection.appendChild(loanDiv);
 
-        const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
-        const collectButton = loanDiv.querySelector('button');
-        collectAmountInput.addEventListener('input', () => {
-          collectButton.disabled = !collectAmountInput.value || parseFloat(collectAmountInput.value) <= 0;
-        });
-      });
-    }
+              const collectAmountInput = document.getElementById(`collectAmount-${loan.id}`);
+              const collectButton = loanDiv.querySelector('button');
+              collectAmountInput.addEventListener('input', () => {
+                  collectButton.disabled = !collectAmountInput.value || parseFloat(collectAmountInput.value) <= 0;
+              });
+          });
+      }
   });
   hideDeleteButtonsForManagers();
 }
@@ -207,6 +210,12 @@ async function handleCollect(loanId) {
     });
     const collectAmountInput = document.getElementById(`collectAmount-${loanId}`);
     const collectAmount = parseFloat(collectAmountInput.value);
+    
+    // Validate the collect amount
+    if (!validateCollectAmount(loanId, collectAmount)) {
+      return; // Stop execution if validation fails
+    }
+
     if (isNaN(collectAmount) || collectAmount <= 0) {
       showToast('Please enter a valid amount.');
       return;
@@ -318,7 +327,8 @@ function clearFilters() {
   const collectionSection = document.getElementById('collectionSection');
   const rows = collectionSection.getElementsByTagName('tr');
   for (let i = 0; i < rows.length; i++) {
-    rows[i].style.display = '';
+    let row = rows[i];
+    row.style.display = '';
   }
   document.getElementById('clearFilters').style.display = 'none';
 }
@@ -338,43 +348,6 @@ function hideDeleteButtonsForManagers() {
   if (userType === 'manager') {
     document.querySelectorAll('.delete-collection-button').forEach(button => button.style.display = 'none');
   }
-}
-
-function showCollectionDetails(loanId) {
-  const modal = document.getElementById('collectionDetailsModal');
-  const modalContent = document.getElementById('collectionDetailsContent');
-  let collections = [];
-  appState.customers.forEach(customer => {
-    customer.loans.forEach(loan => {
-      if (loan.id === loanId) {
-        collections = loan.collections;
-      }
-    });
-  });
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  modalContent.innerHTML = `
-    <h3>Collections for Loan ID: ${loanId}</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Amount</th>
-          ${currentUser?.type === 'admin' ? '<th>Action</th>' : ''}
-        </tr>
-      </thead>
-      <tbody>
-        ${collections.map(collection => `
-          <tr>
-            <td>${new Date(collection.date).toLocaleDateString()}</td>
-            <td>${collection.amount.toFixed(2)}</td>
-            ${currentUser?.type === 'admin' ? `<td><button onclick="handleDeleteCollectionItem('${loanId}', '${collection.date}')"><i class="fas fa-trash-alt"></i></button></td>` : ''}
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    <button class="close-button" onclick="closeCollectionDetails()">Close</button>
-  `;
-  modal.classList.add('show');
 }
 
 async function handleDeleteCollectionItem(loanId, date) {
@@ -655,6 +628,7 @@ function sortTable(tableId, columnIndex, ascending) {
 
 function setupTableSorting(tableId) {
   const table = document.getElementById(tableId);
+  if(table === null) return;
   const headers = table.querySelectorAll('th');
   headers.forEach((header, index) => {
     header.classList.add('sortable');
@@ -669,6 +643,7 @@ function setupTableSorting(tableId) {
 
 function setupPagination(tableId, rowsPerPage) {
   const table = document.getElementById(tableId);
+  if(table === null) return;
   const rows = Array.from(table.querySelectorAll('tbody tr'));
   const totalPages = Math.ceil(rows.length / rowsPerPage);
   const paginationContainer = document.createElement('div');
@@ -690,3 +665,108 @@ function setupPagination(tableId, rowsPerPage) {
 }
 
 export { setupTableSorting, setupPagination };
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupTableSorting('customersTable');
+    setupPagination('customersTable', 10);
+    setupTableSorting('loansTable');
+    setupPagination('loansTable', 10);
+    setupTableSorting('collectionTable');
+    setupPagination('collectionTable', 10);
+
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+    if (menuToggle && mainNav) {
+        menuToggle.addEventListener('click', () => {
+            mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+});
+
+function calculateCompoundInterest(principal, rate, time) {
+    return principal * Math.pow((1 + rate / 100), time) - principal;
+}
+
+function showCollectionDetails(loanId) {
+    const modal = document.getElementById('collectionDetailsModal');
+    const modalContent = document.getElementById('collectionDetailsContent');
+    let collections = [];
+    let loanAmount = 0;
+    let interestRate = 0;
+    let duration = 0;
+
+    appState.customers.forEach(customer => {
+        customer.loans.forEach(loan => {
+            if (loan.id === loanId) {
+                collections = loan.collections;
+                loanAmount = loan.loanAmount;
+                interestRate = loan.interestRate;
+                duration = loan.duration / 30; // Convert duration to months
+            }
+        });
+    });
+
+    const totalAmountDue = loanAmount + calculateCompoundInterest(loanAmount, interestRate, duration);
+    let collectedAmount = 0;
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    modalContent.innerHTML = `
+    <h3>Collections for Loan ID: ${loanId}</h3>
+    <table class="responsive-table" id="modalCollectionTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount Due</th> <!-- Add Amount Due column header -->
+          <th>Amount</th>
+          ${currentUser?.type === 'admin' ? '<th>Action</th>' : ''}
+        </tr>
+      </thead>
+      <tbody>
+        ${collections.map(collection => {
+        collectedAmount += collection.amount;
+        const remainingAmountDue = totalAmountDue - collectedAmount;
+        return `
+            <tr>
+              <td>${new Date(collection.date).toLocaleDateString()}</td>
+              <td>${remainingAmountDue.toFixed(2)}</td> <!-- Add Amount Due column data -->
+              <td>${collection.amount.toFixed(2)}</td>
+              ${currentUser?.type === 'admin' ? `<td><button onclick="handleDeleteCollectionItem('${loanId}', '${collection.date}')"><i class="fas fa-trash-alt"></i></button></td>` : ''}
+            </tr>
+          `;
+    }).join('')}
+      </tbody>
+    </table>
+    <div id="paginationContainerModal"></div> <!-- Add pagination container for modal -->
+    <button class="close-button" onclick="closeCollectionDetails()">Close</button>
+  `;
+    modal.classList.add('show');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.getElementById('menuToggle');
+  const mainNav = document.getElementById('mainNav');
+  if (menuToggle && mainNav) {
+    menuToggle.addEventListener('click', () => {
+      mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
+    });
+  }
+});
+
+window.showCollectionDetails = showCollectionDetails;
+
+function validateCollectAmount(loanId, amount) {
+  const dailyMinimumAmount = calculateDailyMinimumAmount(loanId); // Calculate daily minimum amount
+  if (amount < dailyMinimumAmount) {
+    alert(`Cannot be less than the minimum daily amount of ${dailyMinimumAmount}`);
+    document.getElementById(`collectAmount-${loanId}`).value = dailyMinimumAmount;
+    return false; // Prevent further execution
+  }
+  return true; // Validation passed
+}
+
+function calculateDailyMinimumAmount(loanId) {
+  const loan = appState.customers.flatMap(customer => customer.loans || []).find(l => l.id === loanId);
+  const durationInMonths = loan.duration / 30; // Convert duration to months
+  const totalAmountDue = loan.loanAmount + calculateCompoundInterest(loan.loanAmount, loan.interestRate, durationInMonths);
+  return totalAmountDue / loan.duration;
+}
