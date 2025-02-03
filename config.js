@@ -17,8 +17,6 @@ let appState = {
   currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
 };
 
-export { appState, config, getToken, apiUrl };
-
 function showToast(message) {
   const toaster = document.getElementById('toaster');
   toaster.textContent = message;
@@ -196,7 +194,6 @@ function populateCollectionSection() {
   hideDeleteButtonsForManagers();
 }
 
-
 async function handleCollect(loanId) {
   const confirmed = confirm('Are you sure you want to collect for this loan?');
   if (confirmed) {
@@ -274,6 +271,7 @@ async function handleDeleteCollection(loanId) {
   }
 }
 
+// Filter Methods
 function filterCollections() {
   const filterLoanId = document.getElementById('filterLoanId').value.toLowerCase();
   const collectionSection = document.getElementById('collectionSection');
@@ -332,16 +330,8 @@ function clearFilters() {
   }
   document.getElementById('clearFilters').style.display = 'none';
 }
+// End Filter Methods
 
-function toggleMenu() {
-  const mainNav = document.getElementById('mainNav');
-  if (mainNav) mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
-}
-
-function hideMenu() {
-  const mainNav = document.getElementById('mainNav');
-  if (mainNav) mainNav.style.display = 'none';
-}
 
 function hideDeleteButtonsForManagers() {
   const userType = appState.currentUser?.type;
@@ -365,8 +355,6 @@ async function handleDeleteCollectionItem(loanId, date) {
     showCollectionDetails(loanId);
   }
 }
-
-window.handleDeleteCollectionItem = handleDeleteCollectionItem;
 
 function closeCollectionDetails() {
   const modal = document.getElementById('collectionDetailsModal');
@@ -395,6 +383,17 @@ function generateQRCode(loanId) {
 function closeQRCodeModal() {
   const qrCodeModal = document.getElementById('qrCodeModal');
   qrCodeModal.classList.remove('show');
+}
+
+// Menu Bar
+function toggleMenu() {
+  const mainNav = document.getElementById('mainNav');
+  if (mainNav) mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
+}
+
+function hideMenu() {
+  const mainNav = document.getElementById('mainNav');
+  if (mainNav) mainNav.style.display = 'none';
 }
 
 const menuToggle = document.getElementById('menuToggle');
@@ -466,6 +465,7 @@ if (logoutButton) {
     if (loginScreen) loginScreen.style.display = 'block';
   });
 }
+// End Menu Bar
 
 document.addEventListener('DOMContentLoaded', () => {
   const mainNav = document.getElementById('mainNav');
@@ -587,19 +587,6 @@ if (addLoanForm) {
   });
 }
 
-window.handleDeleteCustomer = handleDeleteCustomer;
-window.handleDeleteLoan = handleDeleteLoan;
-window.filterCollections = filterCollections;
-window.handleDeleteCollection = handleDeleteCollection;
-window.hideDeleteButtonsForManagers = hideDeleteButtonsForManagers;
-window.handleCollect = handleCollect;
-window.showCollectionDetails = showCollectionDetails;
-window.closeCollectionDetails = closeCollectionDetails;
-window.filterNotCompleted = filterNotCompleted;
-window.filterNotCollectedToday = filterNotCollectedToday;
-window.clearFilters = clearFilters;
-window.generateQRCode = generateQRCode;
-window.closeQRCodeModal = closeQRCodeModal;
 
 document.addEventListener('DOMContentLoaded', () => {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -663,8 +650,6 @@ function setupPagination(tableId, rowsPerPage) {
     row.style.display = index < rowsPerPage ? '' : 'none';
   });
 }
-
-export { setupTableSorting, setupPagination };
 
 document.addEventListener('DOMContentLoaded', () => {
     setupTableSorting('customersTable');
@@ -752,8 +737,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-window.showCollectionDetails = showCollectionDetails;
-
 function validateCollectAmount(loanId, amount) {
   const dailyMinimumAmount = calculateDailyMinimumAmount(loanId); // Calculate daily minimum amount
   if (amount < dailyMinimumAmount) {
@@ -770,3 +753,21 @@ function calculateDailyMinimumAmount(loanId) {
   const totalAmountDue = loan.loanAmount + calculateCompoundInterest(loan.loanAmount, loan.interestRate, durationInMonths);
   return totalAmountDue / loan.duration;
 }
+
+window.handleDeleteCustomer = handleDeleteCustomer;
+window.handleDeleteLoan = handleDeleteLoan;
+window.filterCollections = filterCollections;
+window.handleDeleteCollection = handleDeleteCollection;
+window.hideDeleteButtonsForManagers = hideDeleteButtonsForManagers;
+window.handleCollect = handleCollect;
+window.showCollectionDetails = showCollectionDetails;
+window.closeCollectionDetails = closeCollectionDetails;
+window.filterNotCompleted = filterNotCompleted;
+window.filterNotCollectedToday = filterNotCollectedToday;
+window.clearFilters = clearFilters;
+window.generateQRCode = generateQRCode;
+window.closeQRCodeModal = closeQRCodeModal;
+window.handleDeleteCollectionItem = handleDeleteCollectionItem;
+window.showCollectionDetails = showCollectionDetails;
+
+export { appState, config, getToken, apiUrl, calculateCompoundInterest,setupTableSorting, setupPagination };

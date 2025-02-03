@@ -1,4 +1,4 @@
-import { config, getToken, apiUrl, setupTableSorting, setupPagination } from './config.js';
+import { config, getToken, apiUrl, setupTableSorting, setupPagination, calculateCompoundInterest } from './config.js';
 
 async function fetchData() {
   try {
