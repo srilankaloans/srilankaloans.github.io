@@ -193,6 +193,7 @@ function populateCollectionSection() {
       }
   });
   hideDeleteButtonsForManagers();
+  updateTotalAmountPlaceholder(); // Call the function to update the total amount placeholder
 }
 
 async function handleCollect(loanId) {
@@ -285,6 +286,7 @@ function filterCollections() {
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
+  updateTotalAmountPlaceholder(); // Update the total amount placeholder after filtering
 }
 
 function filterNotCompleted() {
@@ -299,6 +301,7 @@ function filterNotCompleted() {
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
+  updateTotalAmountPlaceholder(); // Update the total amount placeholder after filtering
 }
 
 function filterNotCollectedToday() {
@@ -320,6 +323,7 @@ function filterNotCollectedToday() {
     }
   }
   document.getElementById('clearFilters').style.display = 'inline-block';
+  updateTotalAmountPlaceholder(); // Update the total amount placeholder after filtering
 }
 
 function clearFilters() {
@@ -330,6 +334,7 @@ function clearFilters() {
     row.style.display = '';
   }
   document.getElementById('clearFilters').style.display = 'none';
+  updateTotalAmountPlaceholder(); // Update the total amount placeholder after clearing filters
 }
 // End Filter Methods
 
@@ -481,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loansPage) loansPage.style.display = 'none';
   if (collectionsPage) collectionsPage.style.display = 'none';
   if (loginScreen) loginScreen.style.display = 'block';
+  updateTotalAmountPlaceholder(); // Call the function on DOMContentLoaded
 });
 
 const loginForm = document.getElementById('loginForm');
@@ -753,6 +759,23 @@ function calculateDailyMinimumAmount(loanId) {
   const durationInMonths = loan.duration / 30; // Convert duration to months
   const totalAmountDue = loan.loanAmount + calculateCompoundInterest(loan.loanAmount, loan.interestRate, durationInMonths);
   return totalAmountDue / loan.duration;
+}
+
+function updateTotalAmountPlaceholder() {
+  const amountInputs = document.querySelectorAll('#collectionTable tbody tr');
+  let totalAmount = 0;
+  amountInputs.forEach(row => {
+    if (row.style.display !== 'none') {
+      const input = row.querySelector('input[id^="collectAmount-"]');
+      if (input) {
+        const placeholderValue = parseFloat(input.placeholder.replace('Min: ', ''));
+        if (!isNaN(placeholderValue)) {
+          totalAmount += placeholderValue;
+        }
+      }
+    }
+  });
+  document.getElementById('totalAmountPlaceholder').textContent = totalAmount.toFixed(2);
 }
 
 window.handleDeleteCustomer = handleDeleteCustomer;
