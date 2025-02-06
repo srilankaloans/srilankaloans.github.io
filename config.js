@@ -161,6 +161,7 @@ function populateCollectionSection() {
               if (isCollectDisabled) {
                   loan.status = 'completed';
               }
+              const dailyMinimumAmount = calculateDailyMinimumAmount(loan.id); // Calculate Daily Min Amnt
               const loanDiv = document.createElement('tr');
               loanDiv.innerHTML = `
         <td data-label="Customer Name">${customer.name}</td>
@@ -170,7 +171,7 @@ function populateCollectionSection() {
         <td data-label="Amount Due">${remainingAmountDue.toFixed(2)}</td> <!-- Add Amount Due column data -->
         <td data-label="Count">${collections.length}</td>
         <td data-label="Amount">
-          <input type="number" id="collectAmount-${loan.id}" placeholder="Amount" ${isCollectDisabled ? 'disabled' : ''} />
+          <input type="number" id="collectAmount-${loan.id}" placeholder="Min: ${dailyMinimumAmount.toFixed(2)}" ${isCollectDisabled ? 'disabled' : ''} />
         </td>
         <td data-label="Action" class="action-section">
           <button onclick="handleCollect('${loan.id}')" ${isCollectDisabled ? 'class="completed-button" disabled' : ''}>
