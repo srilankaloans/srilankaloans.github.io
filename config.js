@@ -128,7 +128,7 @@ function populateLoansList() {
   appState.customers.forEach((customer) => {
     if (customer.loans) {
       customer.loans.forEach((loan) => {
-        const dailyMinimumAmount = calculateDailyMinimumAmount(loan.id); // Calculate daily minimum amount
+        const dailyMinimumAmount = calculateDailyMinimumAmount(loan.id); // Calculate Daily Min Amnt
         const loanRow = document.createElement('tr');
         loanRow.innerHTML = `
           <td data-label="Loan ID">${loan.id}</td>
@@ -136,7 +136,7 @@ function populateLoansList() {
           <td data-label="Loan Amount">${loan.loanAmount}</td>
           <td data-label="Interest Rate">${loan.interestRate}</td>
           <td data-label="Duration">${loan.duration}</td>
-          <td data-label="Daily Minimum Amount">${dailyMinimumAmount.toFixed(2)}</td> <!-- Add Daily Minimum Amount data -->
+          <td data-label="Daily Min Amnt">${dailyMinimumAmount.toFixed(2)}</td> <!-- Add Daily Min Amnt data -->
           <td data-label="Status">${loan.status}</td> <!-- Move Status column to last -->
           ${currentUser?.type === 'admin' ? `<td data-label="Action"><button class="delete-loan-button" onclick="handleDeleteLoan('${loan.id}')">Delete</button></td>` : ''}
         `;
@@ -738,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function validateCollectAmount(loanId, amount) {
-  const dailyMinimumAmount = calculateDailyMinimumAmount(loanId); // Calculate daily minimum amount
+  const dailyMinimumAmount = calculateDailyMinimumAmount(loanId); // Calculate Daily Min Amnt
   if (amount < dailyMinimumAmount) {
     alert(`Cannot be less than the minimum daily amount of ${dailyMinimumAmount}`);
     document.getElementById(`collectAmount-${loanId}`).value = dailyMinimumAmount;
